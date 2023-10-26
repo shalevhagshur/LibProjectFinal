@@ -74,6 +74,7 @@ class Loan(db.Model):
     customer = db.relationship('Customer', foreign_keys=[CustID])
     book = db.relationship('Book', foreign_keys=[BookID])
 
+#CRUDS for everything
 
 # CRUD for Books
 @app.route('/books', methods=['GET', 'POST'])
@@ -126,6 +127,8 @@ def books(id=None):
 
 
 
+
+
 # CRUD for Customers
 @app.route('/customers', methods=['GET', 'POST'])
 @app.route('/customers/<int:id>', methods=['GET', 'PUT', 'DELETE'])
@@ -175,7 +178,7 @@ def customers(id=None):
             return jsonify({'error': 'Customer not found'}), 404
 
 
-# CRUD for Loans
+#CRUD for Loans
 @app.route('/loans', methods=['GET', 'POST'])
 @app.route('/loans/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def loans(id=None):
@@ -183,12 +186,19 @@ def loans(id=None):
         if id is not None:
             loan = Loan.query.get(id)
             if loan:
-                return jsonify({'LoanID': loan.LoanID, 'CustID': loan.CustID, 'BookID': loan.BookID, 'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'), 'ReturnDate': loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None, 'LoanType': loan.LoanType})
+                max_return_date = calculate_max_return_date(loan.LoanDate, loan.LoanType)
+                return_date = loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None
+                return jsonify({'LoanID': loan.LoanID, 'CustID': loan.CustID, 'BookID': loan.BookID, 'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'), 'ReturnDate': return_date, 'MaxReturnDate': max_return_date, 'LoanType': loan.LoanType})
             else:
                 return jsonify({'error': 'Loan not found'}), 404
         else:
             loans = Loan.query.all()
-            loan_list = [{'LoanID': loan.LoanID, 'CustID': loan.CustID, 'BookID': loan.BookID, 'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'), 'ReturnDate': loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None, 'LoanType': loan.LoanType} for loan in loans]
+            loan_list = []
+            for loan in loans:
+                max_return_date = calculate_max_return_date(loan.LoanDate, loan.LoanType)
+                return_date = loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None
+                loan_data = {'LoanID': loan.LoanID, 'CustID': loan.CustID, 'BookID': loan.BookID, 'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'), 'ReturnDate': return_date, 'MaxReturnDate': max_return_date, 'LoanType': loan.LoanType}
+                loan_list.append(loan_data)
             return jsonify(loan_list)
 
     if request.method == 'POST':
@@ -206,20 +216,14 @@ def loans(id=None):
             book.stock -= 1
 
             loan_date = datetime.utcnow()  # Current UTC time
-            if loan_type == 1:
-                return_date = loan_date + timedelta(days=10)
-            elif loan_type == 2:
-                return_date = loan_date + timedelta(days=5)
-            elif loan_type == 3:
-                return_date = loan_date + timedelta(days=2)
-            else:
-                return_date = None
+            max_return_date = calculate_max_return_date(loan_date, loan_type)
 
-            new_loan = Loan(CustID=data['CustID'], BookID=data['BookID'], LoanType=loan_type, LoanDate=loan_date, ReturnDate=return_date)
+            new_loan = Loan(CustID=data['CustID'], BookID=data['BookID'], LoanType=loan_type, LoanDate=loan_date, MaxReturnDate=max_return_date)
             try:
                 db.session.add(new_loan)
                 db.session.commit()
-                return jsonify({'done': 'success', 'Loan': 'created'}), 201
+                return_date = new_loan.MaxReturnDate.strftime('%Y-%m-%d %H:%M:%S') if new_loan.MaxReturnDate else None
+                return jsonify({'done': 'success', 'Loan': 'created', 'MaxReturnDate': return_date}), 201
             except IntegrityError:
                 db.session.rollback()
                 return jsonify({'error': 'Loan creation failed'}), 400
@@ -230,13 +234,38 @@ def loans(id=None):
         data = request.json
         loan = Loan.query.get(id)
         if loan:
-            loan.CustID = data['CustID']
-            loan.BookID = data['BookID']
-            loan.LoanType = data['LoanType']
+            new_loan_type = data.get('LoanType')
+
+            # Recalculate MaxReturnDate if LoanType is modified
+            if new_loan_type != loan.LoanType:
+                loan.LoanType = new_loan_type
+                max_return_date = calculate_max_return_date(loan.LoanDate, new_loan_type)
+                loan.MaxReturnDate = max_return_date
+
             db.session.commit()
             return jsonify({'done': 'success', 'Loan': 'updated'})
         else:
             return jsonify({'error': 'Loan not found'}), 404
+
+    if request.method == 'DELETE':
+        loan = Loan.query.get(id)
+        if loan:
+            db.session.delete(loan)
+            db.session.commit()
+            return jsonify({'done': 'success', 'Loan': 'deleted'})
+        else:
+            return jsonify({'error': 'Loan not found'}), 404
+
+def calculate_max_return_date(loan_date, loan_type):
+    if loan_type == 1:
+        return_date = loan_date + timedelta(days=10)
+    elif loan_type == 2:
+        return_date = loan_date + timedelta(days=5)
+    elif loan_type == 3:
+        return_date = loan_date + timedelta(days=2)
+    else:
+        return_date = None
+    return return_date
 
 
 @app.route('/return_loan/<int:id>', methods=['PUT'])
@@ -248,7 +277,7 @@ def return_loan(id):
             if loan.ReturnDate is not None:
                 return jsonify({'error': 'Loan has already been returned'}), 400
 
-            # Set the return date to the current UTC time
+            # Set the return date and update the stock only when the loan is returned
             return_date = datetime.utcnow()
             loan.ReturnDate = return_date
 
@@ -261,7 +290,7 @@ def return_loan(id):
             return jsonify({'done': 'success', 'Loan': 'returned'}), 200
         else:
             return jsonify({'error': 'Loan not found'}), 404
-        
+
 
 if __name__ == '__main__':
     app.run(debug=True)
