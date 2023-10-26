@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Library</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+
+<style>
+body, html {
+  height: 100%;
+  font-family: "Inconsolata", sans-serif;
+}
+
+.bgimg {
+  background-position: center;
+  background-size: cover;
+  background-image: url("https://e0.pxfuel.com/wallpapers/408/49/desktop-wallpaper-library-high-quality-huge-library.jpg");
+  min-height: 75%;
+}
+
+.menu {
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Links (sit on top) -->
+<div class="w3-top">
+  <div class="w3-row w3-padding w3-black">
+    <div class="w3-col s3">
+      <a href="/" class="w3-button w3-block w3-black">HOME</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="/bookpage" class="w3-button w3-block w3-black">Books</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="/customerpage" class="w3-button w3-block w3-black">Customers</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="/loanpage" class="w3-button w3-block w3-black">Loans</a>
+    </div>
+  </div>
+</div>
+
+<!-- Header with image -->
+<header class="bgimg w3-display-container w3-grayscale-min" id="home">
+  <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
+  </div>
+  <div class="w3-display-middle w3-center">
+    <span class="w3-text-white" style="font-size:90px">the<br>Library</span>
+  </div>
+  <div class="w3-display-bottomright w3-center w3-padding-large">
+  
+  </div>
+</header>
+
+<!-- Add a background color and large text to the whole page -->
+<div class="w3-sand w3-grayscale w3-large">
+
+<!-- About Container -->
+<div class="w3-container" id="about">
+  <div class="w3-content" style="max-width:700px">
+    <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">ABOUT THE LIBRARY MANAGEMENT SYSTEM</span></h5>
+    <p>The Library Management System is a comprehensive solution designed to efficiently manage library resources and services. It streamlines library operations, making it easier for librarians to track, and lend books, while providing patrons with convenient access to the library's collection.</p>
+    <p>Our system allows librarians to easily add, update books, and keep track of loan transactions. Patrons can browse the library's catalog, check the availability of books, and request loans online. With the Library Management System, we aim to provide a user-friendly and efficient library experience.</p>    
+    <div class="w3-panel w3-leftbar w3-light-grey">
+        <p><i>"Using the Library Management System has transformed the way we handle our library resources. It's a seamless experience from managing loans and providing excellent services to our patrons. The system has made it convenient for both librarians and library users."</i></p>
+        <p>Library Administrator: Eyal The G</p>        
+    </div>
+    <img src="https://static.vecteezy.com/system/resources/thumbnails/022/922/995/small/generative-ai-illustration-of-islamic-library-books-wallpaper-bright-attractive-love-for-books-photo.jpeg" style="width:100%;max-width:1000px" class="w3-margin-top">
+    <p><strong>Opening hours:</strong> Everyday All Day .</p>
+    <p><strong>Address:</strong> At Joe Mama's</p>
+  </div>
+</div>
+
+
+
+<!-- Contact/Area Container -->
+<div class="w3-container" id="where" style="padding-bottom:32px;">
+  <div class="w3-content" style="max-width:700px">
+    <h5 class="w3-center w3-padding-48"><span class="w3-tag w3-wide">WHERE TO FIND US</span></h5>
+    <p>Find us at address Joe Mamas.</p>
+    <img src="https://gray-wtvm-prod.cdn.arcpublishing.com/resizer/Uf4wCn0BZC3qklanJnMsfIeiFz0=/1200x675/smart/filters:quality(85)/cloudfront-us-east-1.images.arcpublishing.com/gray/SBF5KWDTDFH7FOSYVCACVMLBYU.png" class="w3-image" style="width:100%">
+    <p><span class="w3-tag">FYI!</span> We offer comprehensive library management services to support libraries of all sizes and types. We understand your library's unique needs, and we provide solutions that meet the highest standards of efficiency and user satisfaction.</p>
+    <p><strong>Consult</strong> with us for expert library management guidance, inquire about our latest solutions, or simply send us a message:</p>    
+    <div class="w3-container" id="contact">
+        <div class="w3-content" style="max-width:700px">
+          <h5 class="w3-center w3-padding-48"><span class="w3-tag w3-wide">CONTACT US</span></h5>
+          <p>If you have any questions or need assistance with our library management services, please feel free to contact us. We're here to help!</p>
+          <p><strong>Contact Information:</strong></p>
+          <p><i class="fa fa-envelope"></i> Email: lev.shur@gmail.com</p>
+          <p><i class="fa fa-phone"></i> Phone: 055544422</p>
+          <p><i class="fa fa-map-marker"></i> Address: John Bryce, Tel Aviv</p>
+        </div>
+      </div>
+      
+  </div>
+</div>
+
+<!-- End page content -->
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-light-grey w3-padding-48 w3-large">
+  <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+</footer>
+
+<script>
+// Tabbed Menu
+function openMenu(evt, menuName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("menu");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-dark-grey", "");
+  }
+  document.getElementById(menuName).style.display = "block";
+  evt.currentTarget.firstElementChild.className += " w3-dark-grey";
+}
+document.getElementById("myLink").click();
+</script>
+
+</body>
+</html>
