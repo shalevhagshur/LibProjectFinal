@@ -95,53 +95,46 @@
       </tr>
     </table>
 
-<h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Modify Existing Book</span></h5>
-<table class="w3-table w3-striped">
-  <tr>
-    <th>Title</th>
-    <th>Author</th>
-    <th>Publish Year</th>
-    <th>Stock</th>
-    <th>Actions</th>
-  </tr>
-  <tr>
-    <td><input class="w3-input" type="text" id="newTitle"></td>
-    <td><input class="w3-input" type="text" id="newAuthor"></td>
-    <td><input class="w3-input" type="number" id="newYear"></td>
-    <td><input class="w3-input" type="number" id="newStock"></td>
-    <td>
-        <button id="modify-book-button" class="w3-button w3-black" onclick="modifyBook()">Modify</button>
-    </td>
-  </tr>
-</table>
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Modify Existing Book</span></h5>
+    <table class="w3-table w3-striped">
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Publish Year</th>
+        <th>Stock</th>
+        <th>Actions</th>
+      </tr>
+      <tr>
+        <td><input class="w3-input" type="text" id="modifyTitle"></td>
+        <td><input class="w3-input" type="text" id="modifyAuthor"></td>
+        <td><input class="w3-input" type="number" id="modifyYear"></td>
+        <td><input class="w3-input" type="number" id="modifyStock"></td>
+        <td>
+          <input type="hidden" id="modifyBookID"> <!-- Hidden field to store bookID -->
+          <button id="update-book-button" class="w3-button w3-black" onclick="modifyBook()">Modify</button>
+        </td>
+      </tr>
+    </table>
+    
 <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Search for Books</span></h5>
 <input class="w3-input w3-border" type="text" id="searchInput" onkeyup="searchBooks()" placeholder="Search for books...">
 
-    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Books</span></h5>
-    <table id="books-table" class="w3-table w3-striped">
-        
+<h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Books</span></h5>
+<table id="books-table" class="w3-table w3-striped">
+    <thead>
         <tr>
-          <td>Book 1</td>
-          <td>Author 1</td>
-          <td>2007</td>
-          <td>29</td>
-          <td>
-            <button onclick="modifyBook(1)">Modify</button> <!-- Button for modifying book 1 -->
-            <button onclick="deleteBook(1)">Delete</button> <!-- Button for deleting book 1 -->
-          </td>
+            <th>Book ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Published Year</th>
+            <th>Stock</th>
+            <th>Actions</th>
         </tr>
-        <tr>
-          <td>Book 2</td>
-          <td>Author 2</td>
-          <td>2009</td>
-          <td>22</td>
-          <td>
-            <button onclick="modifyBook(2)">Modify</button> <!-- Button for modifying book 2 -->
-            <button onclick="deleteBook(2)">Delete</button> <!-- Button for deleting book 2 -->
-          </td>
-        </tr>
-        <!-- Add more book rows here -->
-      </table>
+    </thead>
+    <tbody>
+        <!-- Data rows will be added here -->
+    </tbody>
+</table>
       
   </div>
 </div>
@@ -156,36 +149,45 @@
 
 <script>
 
-    // Function to fetch and display books
-    function getBooks() {
-        axios.get('/books')
-            .then(response => {
-                const books = response.data;
-                const table = document.getElementById('books-table');
-                table.innerHTML = ''; // Clear the table
-    
-                books.forEach(book => {
-                    const row = table.insertRow();
-                    row.insertCell(0).textContent = book.BookID;
-                    row.insertCell(1).textContent = book.bookname;
-                    row.insertCell(2).textContent = book.bookauthor;
-                    row.insertCell(3).textContent = book.year_published;
-                    row.insertCell(4).textContent = book.stock;
-    
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Delete';
-                    deleteButton.addEventListener('click', () => deleteBook(book.BookID));
-                    row.insertCell(5).appendChild(deleteButton);
-    
-                    const modifyButton = document.createElement('button');
-                    modifyButton.textContent = 'Modify';
-                    modifyButton.addEventListener('click', () => modifyBook(book.BookID));
-                    row.insertCell(6).appendChild(modifyButton);
-                });
-            })
-            .catch(error => console.error(error));
-    }
-    
+
+// Function to fetch and display books
+function getBooks() {
+    axios.get('/books')
+        .then(response => {
+            const books = response.data;
+            const table = document.getElementById('books-table');
+            const tbody = table.querySelector('tbody'); // Get the table body
+
+            // Clear the table body before populating it with new data
+            tbody.innerHTML = '';
+
+            books.forEach(book => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = book.bookname; // Display book name
+                row.insertCell(1).textContent = book.bookauthor;
+                row.insertCell(2).textContent = book.year_published;
+                row.insertCell(3).textContent = book.stock;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteBook(book.BookID));
+                row.insertCell(4).appendChild(deleteButton);
+
+                const modifyButton = document.createElement('button');
+                modifyButton.textContent = 'Modify';
+                modifyButton.classList.add('modify-book-button'); // Add a class to the button
+                modifyButton.dataset.bookId = book.BookID; // Store book ID as a data attribute
+
+                row.insertCell(5).appendChild(modifyButton);
+
+                // Add an event listener for the "Modify" button, read the book ID from data attribute
+                modifyButton.addEventListener('click', (event) => modifyBook(event.target.dataset.bookId));
+            });
+        })
+        .catch(error => console.error(error));
+}
+
+
     // Function to delete a book
     function deleteBook(bookID) {
         axios.delete(`/books/${bookID}`)
@@ -195,10 +197,52 @@
             .catch(error => console.error(error));
     }
     
-    // Function to modify a book
-    function modifyBook(bookID) {
-        // Implement code for modifying a book (e.g., showing a form to edit book details)
-    }
+// Function to modify a book
+function modifyBook(bookID) {
+    // Fetch the book's data based on the bookID
+    let book; // Define book variable here
+
+    axios.get(`/books/${bookID}`)
+        .then(response => {
+            book = response.data; // Assign the fetched book data to the book variable
+            // Populate the modify table with the book's data
+            document.getElementById('modifyTitle').value = book.bookname;
+            document.getElementById('modifyAuthor').value = book.bookauthor;
+            document.getElementById('modifyYear').value = book.year_published;
+            document.getElementById('modifyStock').value = book.stock;
+            // Store the bookID in a hidden input field for reference when updating
+            document.getElementById('modifyBookID').value = bookID;
+        })
+        .catch(error => console.error(error));
+
+    // Update the event listener for the "Update" button to use the bookID
+    document.getElementById('update-book-button').addEventListener('click', function() {
+        if (book) {
+            const updatedBook = {
+                bookname: document.getElementById('modifyTitle').value,
+                bookauthor: document.getElementById('modifyAuthor').value,
+                year_published: parseInt(document.getElementById('modifyYear').value),
+                stock: parseInt(document.getElementById('modifyStock').value),
+            };
+
+            // Use the bookID to update the book using the PUT route
+            axios.put(`/books/${bookID}`, updatedBook)
+                .then(() => {
+                    // Clear the form fields after the update
+                    document.getElementById('modifyTitle').value = '';
+                    document.getElementById('modifyAuthor').value = '';
+                    document.getElementById('modifyYear').value = '';
+                    document.getElementById('modifyStock').value = '';
+                    document.getElementById('modifyBookID').value = '';
+
+                    // Refresh the book list
+                    getBooks();
+                })
+                .catch(error => console.error(error));
+        }
+    });
+}
+
     
     // Call getBooks() when the page loads
     window.addEventListener('load', getBooks);
