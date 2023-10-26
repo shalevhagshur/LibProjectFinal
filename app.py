@@ -1,6 +1,6 @@
 #imports
 from sqlite3 import IntegrityError
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -22,9 +22,25 @@ migrate = Migrate(app, db)
 
 
 #app routes (Crud routes are in cruds)
-@app.route('/')
-def hello_world():
-    return 'Hello, Flask!'
+@app.route('/', methods=["GET"])
+def homepageload():
+    return render_template("index.html")
+
+@app.route('/bookpage', methods=["GET"])
+def bookspageload():
+    return render_template("books.html")
+
+@app.route('/customerpage', methods=["GET"])
+def customerspageload():
+    return render_template("customers.html")
+
+@app.route('/loanpage', methods=["GET"])
+def loanspageload():
+    return render_template("loans.html")
+
+@app.route('/static/js/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
 
 
 #table for books
@@ -247,6 +263,7 @@ def loans(id=None):
         else:
             return jsonify({'error': 'Loan not found'}), 404
 
+
     if request.method == 'DELETE':
         loan = Loan.query.get(id)
         if loan:
@@ -257,6 +274,12 @@ def loans(id=None):
             return jsonify({'error': 'Loan not found'}), 404
 
 def calculate_max_return_date(loan_date, loan_type):
+    if not isinstance(loan_date, datetime):
+        raise ValueError("Invalid loan_date. Please provide a valid datetime object.")
+    
+    if not isinstance(loan_type, int) or loan_type not in [1, 2, 3]:
+        raise ValueError("Invalid loan_type. Please provide 1, 2, or 3.")
+    
     if loan_type == 1:
         return_date = loan_date + timedelta(days=10)
     elif loan_type == 2:
@@ -264,7 +287,8 @@ def calculate_max_return_date(loan_date, loan_type):
     elif loan_type == 3:
         return_date = loan_date + timedelta(days=2)
     else:
-        return_date = None
+        raise ValueError("Invalid loan_type. Please provide 1, 2, or 3.")
+
     return return_date
 
 
