@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
-<script src="/static/js/books.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <style>
   body, html {
     height: 100%;
@@ -89,22 +90,36 @@
         <td><input class="w3-input" type="number" id="newYear"></td>
         <td><input class="w3-input" type="number" id="newStock"></td>
         <td>
-          <button class="w3-button w3-black" onclick="addNewBook()">Add Book</button>
+            <button id="add-book-button" class="w3-button w3-black" onclick="addBook()">Add Book</button>
         </td>
       </tr>
     </table>
+
+<h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Modify Existing Book</span></h5>
+<table class="w3-table w3-striped">
+  <tr>
+    <th>Title</th>
+    <th>Author</th>
+    <th>Publish Year</th>
+    <th>Stock</th>
+    <th>Actions</th>
+  </tr>
+  <tr>
+    <td><input class="w3-input" type="text" id="newTitle"></td>
+    <td><input class="w3-input" type="text" id="newAuthor"></td>
+    <td><input class="w3-input" type="number" id="newYear"></td>
+    <td><input class="w3-input" type="number" id="newStock"></td>
+    <td>
+        <button id="modify-book-button" class="w3-button w3-black" onclick="modifyBook()">Modify</button>
+    </td>
+  </tr>
+</table>
 <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Search for Books</span></h5>
 <input class="w3-input w3-border" type="text" id="searchInput" onkeyup="searchBooks()" placeholder="Search for books...">
 
     <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Books</span></h5>
-    <table class="w3-table w3-striped">
-        <tr>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Publish Year</th>
-          <th>Stock</th>
-          <th>Actions</th> <!-- Add a new header column for actions -->
-        </tr>
+    <table id="books-table" class="w3-table w3-striped">
+        
         <tr>
           <td>Book 1</td>
           <td>Author 1</td>
@@ -138,6 +153,118 @@
 <footer class="w3-center w3-light-grey w3-padding-48 w3-large">
   <p> <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green"></a></p>
 </footer>
+
+<script>
+
+    // Function to fetch and display books
+    function getBooks() {
+        axios.get('/books')
+            .then(response => {
+                const books = response.data;
+                const table = document.getElementById('books-table');
+                table.innerHTML = ''; // Clear the table
+    
+                books.forEach(book => {
+                    const row = table.insertRow();
+                    row.insertCell(0).textContent = book.BookID;
+                    row.insertCell(1).textContent = book.bookname;
+                    row.insertCell(2).textContent = book.bookauthor;
+                    row.insertCell(3).textContent = book.year_published;
+                    row.insertCell(4).textContent = book.stock;
+    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => deleteBook(book.BookID));
+                    row.insertCell(5).appendChild(deleteButton);
+    
+                    const modifyButton = document.createElement('button');
+                    modifyButton.textContent = 'Modify';
+                    modifyButton.addEventListener('click', () => modifyBook(book.BookID));
+                    row.insertCell(6).appendChild(modifyButton);
+                });
+            })
+            .catch(error => console.error(error));
+    }
+    
+    // Function to delete a book
+    function deleteBook(bookID) {
+        axios.delete(`/books/${bookID}`)
+            .then(() => {
+                getBooks();
+            })
+            .catch(error => console.error(error));
+    }
+    
+    // Function to modify a book
+    function modifyBook(bookID) {
+        // Implement code for modifying a book (e.g., showing a form to edit book details)
+    }
+    
+    // Call getBooks() when the page loads
+    window.addEventListener('load', getBooks);
+    
+    // Function to add a new book
+    function addBook() {
+        const bookname = document.getElementById('newTitle').value;
+        const bookauthor = document.getElementById('newAuthor').value;
+        const year_published = parseInt(document.getElementById('newYear').value);
+        const stock = parseInt(document.getElementById('newStock').value);
+    
+        const newBook = {
+            bookname,
+            bookauthor,
+            year_published,
+            stock,
+        };
+    
+        axios.post('/books', newBook)
+            .then(response => {
+                if (response.data.done === 'success') {
+                    document.getElementById('newTitle').value = '';
+                    document.getElementById('newAuthor').value = '';
+                    document.getElementById('newYear').value = '';
+                    document.getElementById('newStock').value = '';
+                    getBooks();
+                } else {
+                    console.error(response.data.error);
+                }
+            })
+            .catch(error => console.error(error));
+    }
+    
+    // Function to modify a book
+    function modifyBook(bookID) {
+        // Implement code for modifying a book (e.g., showing a form to edit book details)
+        // You'll need to populate the form with the book details and handle the form submission
+        // using a similar approach as the addBook function.
+    }
+    
+    // Add event listeners to buttons
+    document.getElementById('add-book-button').addEventListener('click', addBook);
+    
+    // Change 'booksTable' to 'books-table' to match the HTML table ID
+    function searchBooks() {
+        let input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("books-table"); // Change 'booksTable' to 'books-table'
+        tr = table.getElementsByTagName("tr");
+    
+        for (i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+            td = tr[i].getElementsByTagName("td")[0]; // Assuming the title is in the first column
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    
+    </script>
+    
 
 </body>
 </html>

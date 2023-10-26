@@ -9,7 +9,8 @@ from datetime import datetime, timedelta
 
 #flask app
 # Create a Flask web application
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", static_url_path="/static")
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable caching for static files
 
 CORS(app)
 
@@ -93,7 +94,7 @@ class Loan(db.Model):
 #CRUDS for everything
 
 # CRUD for Books
-@app.route('/books', methods=['GET', 'POST'])
+@app.route('/books/', methods=['GET', 'POST'])
 @app.route('/books/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def books(id=None):
     if request.method == 'GET':
