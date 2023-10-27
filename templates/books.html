@@ -225,8 +225,6 @@ function loadBookDataForUpdate(bookID) {
 
 // Modify the modifyBook function to accept bookID as a parameter
 function updateBook() {
-
-    document.getElementById('update-book-button').addEventListener('click', function() {
     const bookID = document.getElementById('modifyBookID').value;
     const updatedBook = {
         bookname: document.getElementById('modifyTitle').value,
@@ -234,6 +232,18 @@ function updateBook() {
         year_published: parseInt(document.getElementById('modifyYear').value),
         stock: parseInt(document.getElementById('modifyStock').value),
     };
+
+    // Check if bookID is not empty
+    if (!bookID) {
+        alert('In Order To Update A Book, Choose Which Book To Modify First Using The Modify Button');
+        return;
+    }
+
+    // Check if any field is empty
+    if (!updatedBook.bookname || !updatedBook.bookauthor || isNaN(updatedBook.year_published) || isNaN(updatedBook.stock)) {
+        alert('Missing Fields Found Make Sure all Fields Are Full');
+        return;
+    }
 
     // Use the bookID to update the book using the PUT route
     axios.put(`/books/${bookID}`, updatedBook)
@@ -249,53 +259,51 @@ function updateBook() {
             getBooks();
         })
         .catch(error => console.error(error));
-});
 }
-
-
 
     
     // Call getBooks() when the page loads
     window.addEventListener('load', getBooks);
     
     // Function to add a new book
-    function addBook() {
-        const bookname = document.getElementById('newTitle').value;
-        const bookauthor = document.getElementById('newAuthor').value;
-        const year_published = parseInt(document.getElementById('newYear').value);
-        const stock = parseInt(document.getElementById('newStock').value);
-    
-        const newBook = {
-            bookname,
-            bookauthor,
-            year_published,
-            stock,
-        };
-    
-        axios.post('/books', newBook)
-            .then(response => {
-                if (response.data.done === 'success') {
-                    document.getElementById('newTitle').value = '';
-                    document.getElementById('newAuthor').value = '';
-                    document.getElementById('newYear').value = '';
-                    document.getElementById('newStock').value = '';
-                    getBooks();
-                } else {
-                    console.error(response.data.error);
-                }
-            })
-            .catch(error => console.error(error));
+// Function to add a new book
+function addBook() {
+    const bookname = document.getElementById('newTitle').value;
+    const bookauthor = document.getElementById('newAuthor').value;
+    const year_published = parseInt(document.getElementById('newYear').value);
+    const stock = parseInt(document.getElementById('newStock').value);
+
+    // Check if any field is empty
+    if (!bookname || !bookauthor || isNaN(year_published) || isNaN(stock)) {
+        alert('All Fields Must Be Filled For Adding A Book');
+        return false; // Stop execution if any field is missing
     }
-    
-    // Function to modify a book
-    function modifyBook(bookID) {
-        // Implement code for modifying a book (e.g., showing a form to edit book details)
-        // You'll need to populate the form with the book details and handle the form submission
-        // using a similar approach as the addBook function.
-    }
-    
-    // Add event listeners to buttons
-    document.getElementById('add-book-button').addEventListener('click', addBook);
+
+    const newBook = {
+        bookname,
+        bookauthor,
+        year_published,
+        stock,
+    };
+
+    axios.post('/books', newBook)
+        .then(response => {
+            if (response.data.done === 'success') {
+                document.getElementById('newTitle').value = '';
+                document.getElementById('newAuthor').value = '';
+                document.getElementById('newYear').value = '';
+                document.getElementById('newStock').value = '';
+                getBooks();
+            } else {
+                console.error(response.data.error);
+            }
+        })
+        .catch(error => console.error(error));
+
+    return false; // Prevent default form submission behavior
+}
+
+
     
     // Change 'booksTable' to 'books-table' to match the HTML table ID
     function searchBooks() {
