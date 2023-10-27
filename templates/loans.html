@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Library - Loans</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <style>
+    body, html {
+      height: 100%;
+      font-family: "Inconsolata", sans-serif;
+    }
+
+    .bgimg {
+      background-position: center;
+      background-size: cover;
+      background-image: url("https://e0.pxfuel.com/wallpapers/408/49/desktop-wallpaper-library-high-quality-huge-library.jpg"); /* Replace with an appropriate background image URL for loans */
+      min-height: 75%;
+    }
+
+    .menu {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Links (sit on top) -->
+<div class="w3-top">
+  <div class="w3-row w3-padding w3-black">
+    <div class="w3-col s3">
+      <a href="/" class="w3-button w3-block w3-black">HOME</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="/bookpage" class="w3-button w3-block w3-black">Books</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="/customerpage" class="w3-button w3-block w3-black">Customers</a>
+    </div>
+    <div class="w3-col s3">
+      <a href="/loanpage" class="w3-button w3-block w3-black">Loans</a>
+    </div>
+  </div>
+</div>
+
+<!-- Header with image -->
+<header class="bgimg w3-display-container w3-grayscale-min" id="home">
+  <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
+  </div>
+  <div class="w3-display-middle w3-center">
+    <span class="w3-text-white" style="font-size:90px">the<br>Library</span>
+  </div>
+  <div class="w3-display-bottomright w3-center w3-padding-large">
+  </div>
+</header>
+
+<!-- Add a background color and large text to the whole page -->
+<div class="w3-sand w3-grayscale w3-large">
+
+<!-- Loans Container -->
+<div class="w3-container" id="loans">
+  <div class="w3-content" style="max-width:700px">
+    <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">Welcome to the Library's Loans Section</span></h5>
+    <p>The Library's Loans section allows you to manage the library's loan information efficiently. You can perform the following actions:</p>
+    <ul>
+      <li>View the list of all loans.</li>
+      <li>Add a new loan to the library.</li>
+      <li>Delete a loan from the library.</li>
+      <li>Modify loan information, such as Loan Type and Return Date.</li>
+      <li>Return a loan and update the stock.</li>
+    </ul>
+    <img src="https://media.istockphoto.com/id/1134344737/photo/book-swap.jpg?s=612x612&w=0&k=20&c=lBFzJYl7zPKiPslS4nOWt_q7DIN5vESVmMEix6sRt0g=" style="width:100%;max-width:1000px" class="w3-margin-top"> <!-- Replace with an appropriate image for loans -->
+
+    <!-- Example Loan List (Replace with your actual loan list) -->
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Add New Loan</span></h5>
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Add New Loan</span></h5>
+    <table class="w3-table w3-striped">
+      <tr>
+        <th>Customer ID</th>
+        <th>Book</th>
+        <th>Loan Type</th>
+        <th>Actions</th>
+      </tr>
+      <tr>
+        <td>
+          <input class="w3-input" type="number" id="newCustID">
+        </td>
+        <td>
+          <div class="w3-row">
+            <div class="w3-col s9">
+              <!-- Input for book name -->
+              <input class="w3-input" type="text" id="bookSearch" oninput="searchBooks()" placeholder="Search for books by name...">
+              <!-- Div to display search results -->
+              <div id="bookSearchResults" class="w3-dropdown-content w3-border"></div>
+            </div>
+            <div class="w3-col s3">
+              <!-- Input for selected book ID -->
+              <input class="w3-input" type="number" id="selectedBookID" placeholder="Book ID" disabled>
+            </div>
+          </div>
+        </td>
+        <td>
+          <select class="w3-select" id="newLoanType">
+            <option value="1">Type 1</option>
+            <option value="2">Type 2</option>
+            <option value="3">Type 3</option>
+          </select>
+        </td>
+        <td>
+          <button id="add-loan-button" class="w3-button w3-black" onclick="addLoan()">Add Loan</button>
+        </td>
+      </tr>
+    </table>
+        
+    
+
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Modify Existing Loan</span></h5>
+    <table class="w3-table w3-striped">
+      <tr>
+        <th>Loan Type</th>
+        <th>Return Date</th>
+        <th>Actions</th>
+      </tr>
+      <tr>
+        <td>
+          <select class="w3-select" id="modifyLoanType">
+            <option value="1">Type 1</option>
+            <option value="2">Type 2</option>
+            <option value="3">Type 3</option>
+          </select>
+        </td>
+        <td><input class="w3-input" type="datetime-local" id="modifyReturnDate"></td>
+        <td>
+          <input type="hidden" id="modifyLoanID"> <!-- Hidden field to store loan ID -->
+          <button id="update-loan-button" class="w3-button w3-black" onclick="updateLoan()">Update</button>
+        </td>
+      </tr>
+    </table>
+
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Search for Loans</span></h5>
+    <input class="w3-input w3-border" type="text" id="searchInput" onkeyup="searchLoans()" placeholder="Search for loans...">
+
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Loans</span></h5>
+    <table id="loans-table" class="w3-table w3-striped">
+      <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Book ID</th>
+          <th>Loan Date</th>
+          <th>Return Date</th>
+          <th>Loan Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be added here -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- End page content -->
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-light-grey w3-padding-48 w3-large">
+  <p> <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green"></a></p>
+</footer>
+
+<script>
+  // Function to fetch and display loans
+  function getLoans() {
+    axios.get('/loans')
+      .then(response => {
+        const loans = response.data;
+        const table = document.getElementById('loans-table');
+        const tbody = table.querySelector('tbody'); // Get the table body
+
+        // Clear the table body before populating it with new data
+        tbody.innerHTML = '';
+
+        loans.forEach(loan => {
+          const row = tbody.insertRow();
+          row.insertCell(0).textContent = loan.CustID; // Display customer ID
+          row.insertCell(1).textContent = loan.BookID; // Display book ID
+          row.insertCell(2).textContent = loan.LoanDate; // Display loan date
+          row.insertCell(3).textContent = loan.ReturnDate; // Display return date
+          row.insertCell(4).textContent = loan.LoanType; // Display loan type
+
+          const modifyButton = document.createElement('button');
+          modifyButton.textContent = 'Modify';
+          modifyButton.classList.add('modify-loan-button'); // Add a class to the button
+          modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
+
+          // Add an event listener for the "Modify" button, passing the loan.LoanID
+          modifyButton.addEventListener('click', (event) => {
+            // Get the loan ID from the data attribute of the modify button
+            const loanID = event.target.dataset.loanId;
+            // Set the loan ID in the hidden input field of the update button
+            document.getElementById('modifyLoanID').value = loanID;
+
+            // Fetch and load the loan data into the update table
+            loadLoanDataForUpdate(loanID);
+          });
+
+          row.insertCell(5).appendChild(modifyButton);
+        });
+      })
+      .catch(error => console.error(error));
+  }
+
+  function loadLoanDataForUpdate(loanID) {
+    axios.get(`/loans/${loanID}`)
+      .then(response => {
+        const loan = response.data;
+        // Populate the update table with the loan's data
+        document.getElementById('modifyLoanType').value = loan.LoanType;
+        document.getElementById('modifyReturnDate').value = loan.ReturnDate;
+      })
+      .catch(error => console.error(error));
+  }
+
+  // Function to delete a loan
+  function deleteLoan(loanID) {
+    axios.delete(`/loans/${loanID}`)
+      .then(() => {
+        getLoans();
+      })
+      .catch(error => console.error(error));
+  }
+
+  // Modify the updateLoan function to accept loanID as a parameter
+  function updateLoan() {
+    document.getElementById('update-loan-button').addEventListener('click', function () {
+      const loanID = document.getElementById('modifyLoanID').value;
+      const updatedLoan = {
+        LoanType: document.getElementById('modifyLoanType').value,
+        ReturnDate: document.getElementById('modifyReturnDate').value,
+      };
+
+      // Check if loanID is not empty
+      if (!loanID) {
+        alert('In Order To Update A Loan, Choose Which Loan To Modify First Using The Modify Button');
+        return;
+      }
+
+      // Use the loanID to update the loan using the PUT route
+      axios.put(`/loans/${loanID}`, updatedLoan)
+        .then(() => {
+          // Clear the form fields after the update
+          document.getElementById('modifyLoanType').value = '';
+          document.getElementById('modifyReturnDate').value = '';
+          document.getElementById('modifyLoanID').value = '';
+
+          // Refresh the loan list
+          getLoans();
+        })
+        .catch(error => console.error(error));
+    });
+  }
+
+  // Call getLoans() when the page loads
+  window.addEventListener('load', getLoans);
+
+  // Function to add a new loan
+  function addLoan() {
+  const custID = document.getElementById('newCustID').value;
+  const bookID = document.getElementById('bookSelect').value;
+  const loanType = document.getElementById('newLoanType').value;
+
+  // Check if any field is empty
+  if (!custID || !bookID || !loanType) {
+    alert('All Fields Must Be Filled For Adding A Loan');
+    return false; // Stop execution if any field is missing
+  }
+
+  const newLoan = {
+    CustID: custID,
+    BookID: bookID,
+    LoanType: loanType,
+  };
+
+  axios.post('/loans', newLoan)
+    .then(response => {
+      if (response.data.done === 'success') {
+        document.getElementById('newCustID').value = '';
+        document.getElementById('bookSelect').value = '';
+        document.getElementById('newLoanType').value = '';
+        getLoans();
+      } else {
+        console.error(response.data.error);
+      }
+    })
+    .catch(error => console.error(error));
+
+  return false; // Prevent default form submission behavior
+}
+
+
+  // Change 'loansTable' to 'loans-table' to match the HTML table ID
+  function searchLoans() {
+    let input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById('searchInput');
+    filter = input.value.toUpperCase();
+    table = document.getElementById('loans-table'); // Change 'loansTable' to 'loans-table'
+    tr = table.getElementsByTagName('tr');
+
+    for (i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+      td = tr[i].getElementsByTagName('td')[0]; // Assuming the
+
+      for (let j = 0; j < 5; j++) {
+        td = tr[i].getElementsByTagName('td')[j];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = '';
+            break;
+          } else {
+            tr[i].style.display = 'none';
+          }
+        }
+      }
+    }
+  }
+
+
+  function searchBooks() {
+    let input, filter, div, options;
+    input = document.getElementById("bookSearch");
+    filter = input.value.toUpperCase();
+    div = document.getElementById("bookNames");
+    options = div.getElementsByTagName("option");
+    const resultsDiv = document.getElementById("bookSearchResults");
+
+    // Clear previous search results
+    resultsDiv.innerHTML = '';
+
+    for (let i = 0; i < options.length; i++) {
+        let bookName = options[i].value;
+        if (bookName.toUpperCase().includes(filter)) {
+            options[i].style.display = "";
+            // Create a new div element for each matching book name
+            const resultItem = document.createElement("div");
+            resultItem.textContent = bookName;
+
+            // Add an event listener to set the selected book name
+            resultItem.addEventListener("click", function () {
+                input.value = bookName;
+                resultsDiv.innerHTML = ''; // Clear the results
+            });
+
+            resultsDiv.appendChild(resultItem);
+        } else {
+            options[i].style.display = "none";
+        }
+    }
+
+    // Show or hide the results div based on search results
+    if (resultsDiv.innerHTML !== '') {
+        resultsDiv.style.display = "block";
+    } else {
+        resultsDiv.style.display = "none";
+    }
+}
+
+
+
+</script>
+</html>
