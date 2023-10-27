@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Library - Customers</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style>
+  body, html {
+    height: 100%;
+    font-family: "Inconsolata", sans-serif;
+  }
+
+  .bgimg {
+    background-position: center;
+    background-size: cover;
+    background-image: url("https://e0.pxfuel.com/wallpapers/408/49/desktop-wallpaper-library-high-quality-huge-library.jpg"); /* Replace with an appropriate background image URL for customers */
+    min-height: 75%;
+  }
+
+  .menu {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- Links (sit on top) -->
+<div class="w3-top">
+  <div class="w3-row w3-padding w3-black">
+    <div class="w3-col s3">
+        <a href="/" class="w3-button w3-block w3-black">HOME</a>
+      </div>
+      <div class="w3-col s3">
+        <a href="/bookpage" class="w3-button w3-block w3-black">Books</a>
+      </div>
+      <div class="w3-col s3">
+        <a href="/customerpage" class="w3-button w3-block w3-black">Customers</a>
+      </div>
+      <div class="w3-col s3">
+        <a href="/loanpage" class="w3-button w3-block w3-black">Loans</a>
+      </div>
+  </div>
+</div>
+
+<!-- Header with image -->
+<header class="bgimg w3-display-container w3-grayscale-min" id="home">
+  <div class="w3-display-bottomleft w3-center w3-padding-large w3-hide-small">
+  </div>
+  <div class="w3-display-middle w3-center">
+    <span class="w3-text-white" style="font-size:90px">the<br>Library</span>
+  </div>
+  <div class="w3-display-bottomright w3-center w3-padding-large">
+  
+  </div>
+</header>
+
+<!-- Add a background color and large text to the whole page -->
+<div class="w3-sand w3-grayscale w3-large">
+
+<!-- Customers Container -->
+<div class="w3-container" id="customers">
+  <div class="w3-content" style="max-width:700px">
+    <h5 class="w3-center w3-padding-64"><span class="w3-tag w3-wide">Welcome to the Library's Customers Section</span></h5>
+    <p>The Library's Customers section allows you to manage the library's customer information efficiently. You can perform the following actions:</p>
+    <ul>
+      <li>View the list of all customers.</li>
+      <li>Add a new customer to the library.</li>
+      <li>Delete a customer from the library.</li>
+      <li>Modify customer information, such as Name, City, and Age.</li>
+    </ul>
+    <img src="https://media.istockphoto.com/id/1458679553/photo/group-of-high-school-students-using-laptop-in-library.webp?b=1&s=170667a&w=0&k=20&c=caRHArRsICNwtOkgfll35reUG-QG2Fhf-4sOyTsDTH0=" style="width:100%;max-width:1000px" class="w3-margin-top"> <!-- Replace with an appropriate image for customers -->
+
+    <!-- Example Customer List (Replace with your actual customer list) -->
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Add New Customers</span></h5>
+    <table class="w3-table w3-striped">
+      <tr>
+        <th>Name</th>
+        <th>City</th>
+        <th>Age</th>
+        <th>Actions</th>
+      </tr>
+      <tr>
+        <td><input class="w3-input" type="text" id="newName"></td>
+        <td><input class="w3-input" type="text" id="newCity"></td>
+        <td><input class="w3-input" type="number" id="newAge"></td>
+        <td>
+            <button id="add-customer-button" class="w3-button w3-black" onclick="addCustomer()">Add Customer</button>
+        </td>
+      </tr>
+    </table>
+
+    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Modify Existing Customer</span></h5>
+    <table class="w3-table w3-striped">
+      <tr>
+        <th>Name</th>
+        <th>City</th>
+        <th>Age</th>
+        <th>Actions</th>
+        <tr>
+            <td><input class="w3-input" type="text" id="modifyName"></td>
+            <td><input class="w3-input" type="text" id="modifyCity"></td>
+            <td><input class="w3-input" type="number" id="modifyAge"></td>
+            <td>
+                <input type="hidden" id="modifyCustomerID"> <!-- Hidden field to store customer ID -->
+                <button id="update-customer-button" class="w3-button w3-black" onclick="updateCustomer()">Update</button>
+            </td>
+        </tr>     
+    </table>
+    
+<h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Search for Customers</span></h5>
+<input class="w3-input w3-border" type="text" id="searchInput" onkeyup="searchCustomers()" placeholder="Search for customers...">
+
+<h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Customers</span></h5>
+<table id="customers-table" class="w3-table w3-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>City</th>
+            <th>Age</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data rows will be added here -->
+    </tbody>
+</table>
+      
+  </div>
+</div>
+
+<!-- End page content -->
+</div>
+
+<!-- Footer -->
+<footer class="w3-center w3-light-grey w3-padding-48 w3-large">
+  <p> <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green"></a></p>
+</footer>
+
+<script>
+
+// Function to fetch and display customers
+function getCustomers() {
+    axios.get('/customers')
+        .then(response => {
+            const customers = response.data;
+            const table = document.getElementById('customers-table');
+            const tbody = table.querySelector('tbody'); // Get the table body
+
+            // Clear the table body before populating it with new data
+            tbody.innerHTML = '';
+
+            customers.forEach(customer => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = customer.CustName; // Display customer name
+                row.insertCell(1).textContent = customer.City;
+                row.insertCell(2).textContent = customer.Age;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteCustomer(customer.CustID));
+                row.insertCell(3).appendChild(deleteButton);
+
+                const modifyButton = document.createElement('button');
+                modifyButton.textContent = 'Modify';
+                modifyButton.classList.add('modify-customer-button'); // Add a class to the button
+                modifyButton.dataset.customerId = customer.CustID; // Store customer ID as a data attribute
+                
+                // Add an event listener for the "Modify" button, passing the customer.CustID
+                modifyButton.addEventListener('click', (event) => {
+                // Get the customer ID from the data attribute of the modify button
+                const customerID = event.target.dataset.customerId;
+                // Set the customer ID in the hidden input field of the update button
+                document.getElementById('modifyCustomerID').value = customerID;
+                
+                // Fetch and load the customer data into the update table
+                loadCustomerDataForUpdate(customerID);
+                });
+
+                row.insertCell(4).appendChild(modifyButton);
+            });
+        })
+        .catch(error => console.error(error));
+}
+
+function loadCustomerDataForUpdate(customerID) {
+    axios.get(`/customers/${customerID}`)
+        .then(response => {
+            const customer = response.data;
+            // Populate the update table with the customer's data
+            document.getElementById('modifyName').value = customer.CustName;
+            document.getElementById('modifyCity').value = customer.City;
+            document.getElementById('modifyAge').value = customer.Age;
+        })
+        .catch(error => console.error(error));
+}
+
+// Function to delete a customer
+function deleteCustomer(customerID) {
+    axios.delete(`/customers/${customerID}`)
+        .then(() => {
+            getCustomers();
+        })
+        .catch(error => console.error(error));
+}
+
+
+// Function to update a customer
+function updateCustomer() {
+    const customerID = document.getElementById('modifyCustomerID').value;
+    const updatedCustomer = {
+        CustName: document.getElementById('modifyName').value,
+        City: document.getElementById('modifyCity').value,
+        Age: parseInt(document.getElementById('modifyAge').value),
+    };
+
+    // Check if customerID is not empty
+    if (!customerID) {
+        alert('In Order To Update A Customer, Choose Which Customer To Modify First Using The Modify Button');
+        return;
+    }
+
+    // Check if any field is empty
+    if (!updatedCustomer.CustName || !updatedCustomer.City || isNaN(updatedCustomer.Age)) {
+        alert('Missing Fields Found Make Sure all Fields Are Full');
+        return;
+    }
+
+    // Use the customerID to update the customer using the PUT route
+    axios.put(`/customers/${customerID}`, updatedCustomer)
+        .then(() => {
+            // Clear the form fields after the update
+            document.getElementById('modifyName').value = '';
+            document.getElementById('modifyCity').value = '';
+            document.getElementById('modifyAge').value = '';
+            document.getElementById('modifyCustomerID').value = '';
+
+            // Refresh the customer list
+            getCustomers();
+        })
+        .catch(error => console.error(error));
+}
+
+
+// Call getCustomers() when the page loads
+window.addEventListener('load', getCustomers);
+
+// Function to add a new customer
+function addCustomer() {
+    const name = document.getElementById('newName').value;
+    const city = document.getElementById('newCity').value;
+    const age = parseInt(document.getElementById('newAge').value);
+
+    // Check if any field is empty
+    if (!name || !city || isNaN(age)) {
+        alert('All Fields Must Be Filled For Adding A Customer');
+        return false; // Stop execution if any field is missing
+    }
+
+    const newCustomer = {
+        CustName: name,
+        City: city,
+        Age: age,
+    };
+
+    axios.post('/customers', newCustomer)
+        .then(response => {
+            if (response.data.done === 'success') {
+                document.getElementById('newName').value = '';
+                document.getElementById('newCity').value = '';
+                document.getElementById('newAge').value = '';
+                getCustomers();
+            } else {
+                console.error(response.data.error);
+            }
+        })
+        .catch(error => console.error(error));
+
+    return false; // Prevent default form submission behavior
+}
+
+// Change 'customersTable' to 'customers-table' to match the HTML table ID
+function searchCustomers() {
+    let input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("searchInput");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("customers-table"); // Change 'customersTable' to 'customers-table'
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+        td = tr[i].getElementsByTagName("td")[0]; // Assuming the
+
+        for (let j = 0; j < 3; j++) {
+            td = tr[i].getElementsByTagName("td")[j];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    break;
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>
