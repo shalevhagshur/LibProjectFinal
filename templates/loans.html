@@ -86,19 +86,23 @@
       </tr>
       <tr>
         <td>
-          <input class="w3-input" type="number" id="newCustID">
+            <select id="customerSelect" onchange="updateSelectedCustomerID()">
+                <option value="" disabled selected>Select a customer</option>
+              </select>
+              <input type="hidden" id="selectedCustomerID" name="selectedCustomerID">
         </td>
         <td>
           <div class="w3-row">
             <div class="w3-col s9">
               <!-- Input for book name -->
-              <input class="w3-input" type="text" id="bookSearch" oninput="searchBooks()" placeholder="Search for books by name...">
-              <!-- Div to display search results -->
-              <div id="bookSearchResults" class="w3-dropdown-content w3-border"></div>
             </div>
             <div class="w3-col s3">
               <!-- Input for selected book ID -->
-              <input class="w3-input" type="number" id="selectedBookID" placeholder="Book ID" disabled>
+              <select id="bookSelect" onchange="updateSelectedBookID()">
+                <option value="" disabled selected>Select a book</option>
+              </select>
+              <input type="hidden" id="selectedBookID" name="selectedBookID">
+            
             </div>
           </div>
         </td>
@@ -327,46 +331,69 @@
   }
 
 
-  function searchBooks() {
-    let input, filter, div, options;
-    input = document.getElementById("bookSearch");
-    filter = input.value.toUpperCase();
-    div = document.getElementById("bookNames");
-    options = div.getElementsByTagName("option");
-    const resultsDiv = document.getElementById("bookSearchResults");
+// Function to fetch and display books
+function getAvailableBooks() {
+  axios.get('/books')
+    .then(response => {
+      const books = response.data;
+      const bookSelect = document.getElementById('bookSelect');
 
-    // Clear previous search results
-    resultsDiv.innerHTML = '';
-
-    for (let i = 0; i < options.length; i++) {
-        let bookName = options[i].value;
-        if (bookName.toUpperCase().includes(filter)) {
-            options[i].style.display = "";
-            // Create a new div element for each matching book name
-            const resultItem = document.createElement("div");
-            resultItem.textContent = bookName;
-
-            // Add an event listener to set the selected book name
-            resultItem.addEventListener("click", function () {
-                input.value = bookName;
-                resultsDiv.innerHTML = ''; // Clear the results
-            });
-
-            resultsDiv.appendChild(resultItem);
-        } else {
-            options[i].style.display = "none";
+      books.forEach(book => {
+        if (book.stock > 0) {
+          const option = document.createElement('option');
+          option.value = book.BookID;
+          option.textContent = book.bookname; // Set the BookName as the text content
+          bookSelect.appendChild(option);
         }
-    }
+      });
+    })
+    .catch(error => console.error(error));
+}
 
-    // Show or hide the results div based on search results
-    if (resultsDiv.innerHTML !== '') {
-        resultsDiv.style.display = "block";
-    } else {
-        resultsDiv.style.display = "none";
-    }
+// Function to update the selectedBookID when an option is chosen
+function updateSelectedBookID() {
+  const bookSelect = document.getElementById('bookSelect');
+  const selectedBookID = document.getElementById('selectedBookID');
+  
+  const selectedOption = bookSelect.options[bookSelect.selectedIndex];
+  selectedBookID.value = selectedOption.value;
+}
+
+// Call getAvailableBooks after the page has fully loaded
+window.addEventListener('load', getAvailableBooks);
+
+
+
+// Function to fetch and display customers
+function getAvailableCustomers() {
+  axios.get('/customers')
+    .then(response => {
+      const customers = response.data;
+      const customerSelect = document.getElementById('customerSelect');
+
+      customers.forEach(customer => {
+        const option = document.createElement('option');
+        option.value = customer.CustID;
+        option.textContent = customer.CustName; // Set the full customer name as text content
+        customerSelect.appendChild(option);
+      });
+    })
+    .catch(error => console.error(error));
+}
+
+// Call getAvailableCustomers after the page has fully loaded
+window.addEventListener('load', getAvailableCustomers);
+
+// Function to update the selectedCustomerID when a customer is chosen
+function updateSelectedCustomerID() {
+  const customerSelect = document.getElementById('customerSelect');
+  const selectedCustomerID = document.getElementById('selectedCustomerID');
+
+  const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+  selectedCustomerID.value = selectedOption.value;
 }
 
 
 
 </script>
-</html>
+</html> 
