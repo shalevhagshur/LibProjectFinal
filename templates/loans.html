@@ -231,7 +231,8 @@ function getLoans() {
         const cellBookName = row.insertCell(1);
         const cellLoanDate = row.insertCell(2);
         const cellReturnDate = row.insertCell(3);
-        const cellActions = row.insertCell(4);
+        const cellLoantime = row.insertCell(4);
+        const cellActions = row.insertCell(5);
 
         // Fetch and display customer name
         getCustomerName(loan.CustID).then(CustName => {
@@ -246,15 +247,16 @@ function getLoans() {
         // Display loan date
         cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
 
-        // Display return date (You'll need to fetch this information)
-        // Use the appropriate function to fetch and display return date here
-        // Example: getReturnDate(loan.LoanID).then(returnDate => {
-        //   cellReturnDate.textContent = returnDate;
-        // });
+        // Display return date or a placeholder
+        if (loan.ReturnDate) {
+          cellReturnDate.textContent = loan.ReturnDate;
+        } else {
+          cellReturnDate.textContent = 'Not returned yet';
+        }
 
-        // Display loan type as "10 days," "5 days," or "2 days"
+        // Display loan type as "10 days," "5 days," or "2 days" in cellLoantime
         const loanTypeText = getLoanTypeText(loan.LoanType);
-        cellReturnDate.textContent = loanTypeText; // Loan Time
+        cellLoantime.textContent = loanTypeText; // Loan Time
 
         // Hide the actual book ID, customer ID, and loan type as hidden fields
         const hiddenBookID = document.createElement('input');
@@ -291,6 +293,7 @@ function getLoans() {
       // Handle the error, e.g., display an error message to the user
     });
 }
+
 
 
 // Helper function to fetch and display customer name by ID
