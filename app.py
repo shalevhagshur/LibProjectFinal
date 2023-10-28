@@ -22,6 +22,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
+
 #app routes (Crud routes are in cruds)
 @app.route('/', methods=["GET"])
 def homepageload():
