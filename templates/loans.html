@@ -189,30 +189,37 @@
     
     // Modify the updateLoan function to accept loanID as a parameter
     function updateLoan(loanID) {
-      const updatedLoan = {
-        LoanType: parseInt(document.getElementById('modifyLoanType').value, 10),
-        LoanDate: document.getElementById('modifyLoanDate').value,
-      };
-    
-      // Check if any field is empty
-      if (!updatedLoan.LoanType || !updatedLoan.LoanDate) {
-        alert('Missing Fields Found, Make Sure All Fields Are Filled');
-        return;
-      }
-    
-      // Use the loanID to update the loan using the PUT route
-      axios.put(`/loans/${loanID}`, updatedLoan)
-        .then(() => {
-          // Clear the form fields after the update
-          document.getElementById('modifyLoanType').value = '';
-          document.getElementById('modifyLoanDate').value = '';
-          document.getElementById('modifyLoanID').value = '';
-    
-          // Refresh the loan list
-          getLoans();
-        })
-        .catch(error => console.error(error));
-    }
+  if (loanID === undefined) {
+    // Handle the case where loanID is undefined
+    loanID = document.getElementById('modifyLoanID').value;
+  }
+
+  const updatedLoan = {
+    LoanType: parseInt(document.getElementById('modifyLoanType').value, 10),
+    LoanDate: document.getElementById('modifyLoanDate').value,
+  };
+
+  // Check if any field is empty
+  if (!updatedLoan.LoanType || !updatedLoan.LoanDate) {
+    alert('Missing Fields Found, Make Sure All Fields Are Filled');
+    return;
+  }
+
+  // Use the loanID to update the loan using the PUT route
+  axios.put(`/loans/${loanID}`, updatedLoan)
+    .then(() => {
+      // Clear the form fields after the update
+      document.getElementById('modifyLoanType').value = '';
+      document.getElementById('modifyLoanDate').value = '';
+      document.getElementById('modifyLoanID').value = '';
+
+      // Refresh the loan list
+      getLoans();
+    })
+    .catch(error => console.error(error));
+}
+
+
     
     // Function to fetch and display loans with customer and book names
     function getLoans() {
