@@ -125,7 +125,7 @@
     <table class="w3-table w3-striped">
       <tr>
         <th>Loan Type</th>
-        <th>Return Date</th>
+        <th>Loan Date</th> <!-- Change "Loan Date" here -->
         <th>Actions</th>
       </tr>
       <tr>
@@ -136,7 +136,7 @@
             <option value="3">Type 3</option>
           </select>
         </td>
-        <td><input class="w3-input" type="datetime-local" id="modifyReturnDate"></td>
+        <td><input class="w3-input" type="datetime-local" id="modifyLoanDate" disabled></td> <!-- Change the input ID to "modifyLoanDate" -->
         <td>
           <input type="hidden" id="modifyLoanID"> <!-- Hidden field to store loan ID -->
           <button id="update-loan-button" class="w3-button w3-black" onclick="updateLoan()">Update</button>
@@ -149,16 +149,16 @@
 
     <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Loans</span></h5>
     <table id="loans-table" class="w3-table w3-striped">
-      <thead>
-        <tr>
-          <th>Customer ID</th>
-          <th>Book ID</th>
-          <th>Loan Date</th>
-          <th>Return Date</th>
-          <th>Loan Type</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+        <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>Book Name</th>
+              <th>Loan Date</th>
+              <th>Return Date</th>
+              <th>Loan Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>          
       <tbody>
         <!-- Data rows will be added here -->
       </tbody>
@@ -175,57 +175,183 @@
 </footer>
 
 <script>
-  // Function to fetch and display loans
-  function getLoans() {
-    axios.get('/loans')
-      .then(response => {
-        const loans = response.data;
-        const table = document.getElementById('loans-table');
-        const tbody = table.querySelector('tbody'); // Get the table body
 
-        // Clear the table body before populating it with new data
-        tbody.innerHTML = '';
+// Function to fetch and display loans
+// Define the getLoanTypeText function
+function getLoanTypeText(loanType) {
+  if (loanType === 1) return '10 days';
+  if (loanType === 2) return '5 days';
+  if (loanType === 3) return '2 days';
+  return 'Unknown';
+}
 
-        loans.forEach(loan => {
-          const row = tbody.insertRow();
-          row.insertCell(0).textContent = loan.CustID; // Display customer ID
-          row.insertCell(1).textContent = loan.BookID; // Display book ID
-          row.insertCell(2).textContent = loan.LoanDate; // Display loan date
-          row.insertCell(3).textContent = loan.ReturnDate; // Display return date
-          row.insertCell(4).textContent = loan.LoanType; // Display loan type
+// Modify the updateLoan function to accept loanID as a parameter
+function updateLoan(loanID) {
+  const updatedLoan = {
+    LoanType: parseInt(document.getElementById('modifyLoanType').value, 10),
+    LoanDate: document.getElementById('modifyLoanDate').value,
+  };
 
-          const modifyButton = document.createElement('button');
-          modifyButton.textContent = 'Modify';
-          modifyButton.classList.add('modify-loan-button'); // Add a class to the button
-          modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
+  // Check if loanID is not empty
+  if (!loanID) {
+    alert('In Order To Update A Loan, Choose Which Loan To Modify First Using The Modify Button');
+    return;
+  }
 
-          // Add an event listener for the "Modify" button, passing the loan.LoanID
-          modifyButton.addEventListener('click', (event) => {
-            // Get the loan ID from the data attribute of the modify button
-            const loanID = event.target.dataset.loanId;
-            // Set the loan ID in the hidden input field of the update button
-            document.getElementById('modifyLoanID').value = loanID;
+  // Use the loanID to update the loan using the PUT route
+  axios.put(`/loans/${loanID}`, updatedLoan)
+    .then(() => {
+      // Clear the form fields after the update
+      document.getElementById('modifyLoanType').value = '';
+      document.getElementById('modifyLoanDate').value = '';
+      document.getElementById('modifyLoanID').value = '';
 
-            // Fetch and load the loan data into the update table
-            loadLoanDataForUpdate(loanID);
-          });
+      // Refresh the loan list
+      getLoans();
+    })
+    .catch(error => console.error(error));
+}
 
-          row.insertCell(5).appendChild(modifyButton);
+// Function to fetch and display loans with customer and book names
+function getLoans() {
+  axios.get('/loans')
+    .then(response => {
+      const loans = response.data;
+      const table = document.getElementById('loans-table');
+      const tbody = table.querySelector('tbody'); // Get the table body
+
+      // Clear the table body before populating it with new data
+      tbody.innerHTML = '';
+
+      loans.forEach(loan => {
+        const row = tbody.insertRow();
+        
+        // Create all the cells for the row
+        const cellCustomerName = row.insertCell(0);
+        const cellBookName = row.insertCell(1);
+        const cellLoanDate = row.insertCell(2);
+        const cellReturnDate = row.insertCell(3);
+        const cellActions = row.insertCell(4);
+
+        // Fetch and display customer name
+        getCustomerName(loan.CustID).then(CustName => {
+          cellCustomerName.textContent = CustName; // Customer Name
         });
-      })
-      .catch(error => console.error(error));
-  }
 
-  function loadLoanDataForUpdate(loanID) {
-    axios.get(`/loans/${loanID}`)
-      .then(response => {
-        const loan = response.data;
-        // Populate the update table with the loan's data
-        document.getElementById('modifyLoanType').value = loan.LoanType;
-        document.getElementById('modifyReturnDate').value = loan.ReturnDate;
-      })
-      .catch(error => console.error(error));
-  }
+        // Fetch and display book name
+        getBookName(loan.BookID).then(bookname => {
+          cellBookName.textContent = bookname; // Book Name
+        });
+
+        // Display loan date
+        cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
+
+        // Display return date (You'll need to fetch this information)
+        // Use the appropriate function to fetch and display return date here
+        // Example: getReturnDate(loan.LoanID).then(returnDate => {
+        //   cellReturnDate.textContent = returnDate;
+        // });
+
+        // Display loan type as "10 days," "5 days," or "2 days"
+        const loanTypeText = getLoanTypeText(loan.LoanType);
+        cellReturnDate.textContent = loanTypeText; // Loan Time
+
+        // Hide the actual book ID, customer ID, and loan type as hidden fields
+        const hiddenBookID = document.createElement('input');
+        hiddenBookID.type = 'hidden';
+        hiddenBookID.value = loan.BookID || ''; // Check for null values
+        row.appendChild(hiddenBookID);
+
+        const hiddenCustID = document.createElement('input');
+        hiddenCustID.type = 'hidden';
+        hiddenCustID.value = loan.CustID || ''; // Check for null values
+        row.appendChild(hiddenCustID);
+
+        const hiddenLoanType = document.createElement('input');
+        hiddenLoanType.type = 'hidden';
+        hiddenLoanType.value = loan.LoanType || ''; // Check for null values
+        row.appendChild(hiddenLoanType);
+
+        const modifyButton = document.createElement('button');
+        modifyButton.textContent = 'Modify';
+        modifyButton.classList.add('modify-loan-button'); // Add a class to the button
+        modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
+
+        // Add an event listener for the "Modify" button, passing the loan.LoanID
+        modifyButton.addEventListener('click', (event) => {
+          const loanID = event.target.dataset.loanId;
+          updateLoan(loanID);
+        });
+
+        cellActions.appendChild(modifyButton); // Actions
+      });
+    })
+    .catch(error => {
+      console.error(error);
+      // Handle the error, e.g., display an error message to the user
+    });
+}
+
+
+// Helper function to fetch and display customer name by ID
+function getCustomerName(CustID) {
+  return axios.get(`/customers/${CustID}`)
+    .then(customerResponse => {
+      if (customerResponse.status === 200) {
+        return customerResponse.data.CustName || 'Unknown'; // Use CustName as the property
+      } else {
+        return 'Customer not found';
+      }
+    })
+    .catch(customerError => {
+      console.error('Error fetching customer:', customerError);
+      return 'Error fetching customer';
+    });
+}
+
+// Helper function to fetch and display book name by ID
+function getBookName(BookID) {
+  return axios.get(`/books/${BookID}`)
+    .then(bookResponse => {
+      if (bookResponse.status === 200) {
+        return bookResponse.data.bookname || 'Unknown';
+      } else {
+        return 'Book not found';
+      }
+    })
+    .catch(bookError => {
+      console.error('Error fetching book:', bookError);
+      return 'Error fetching book';
+    });
+}
+
+// Helper function to fetch and display loan type text
+function getLoanTypeText(loanType) {
+  if (loanType === 1) return '10 days';
+  if (loanType === 2) return '5 days';
+  if (loanType === 3) return '2 days';
+  return 'Unknown';
+}
+
+
+
+// Call getLoans() when the page loads
+window.addEventListener('load', getLoans);
+
+// Assuming you have a loan object or variable defined earlier in your code
+
+// axios.get(`/loans/${loan.loanID}`)
+//   .then(response => {
+//     const loan = response.data; // Define loan here
+//     // Populate the update table with the loan's data
+//     document.getElementById('modifyLoanType').value = loan.LoanType;
+//     document.getElementById('modifyLoanDate').value = loan.LoanDate;
+//   })
+//   .catch(error => console.error(error));
+
+
+// row.insertCell(cellIndex++).appendChild(modifyButton);
+
 
   // Function to delete a loan
   function deleteLoan(loanID) {
@@ -241,8 +367,8 @@
     document.getElementById('update-loan-button').addEventListener('click', function () {
       const loanID = document.getElementById('modifyLoanID').value;
       const updatedLoan = {
-        LoanType: document.getElementById('modifyLoanType').value,
-        ReturnDate: document.getElementById('modifyReturnDate').value,
+        LoanType: parseInt(document.getElementById('modifyLoanType').value, 10),
+        LoanDate: document.getElementById('modifyLoanDate').value,
       };
 
       // Check if loanID is not empty
@@ -256,7 +382,7 @@
         .then(() => {
           // Clear the form fields after the update
           document.getElementById('modifyLoanType').value = '';
-          document.getElementById('modifyReturnDate').value = '';
+          document.getElementById('modifyLoanDate').value = '';
           document.getElementById('modifyLoanID').value = '';
 
           // Refresh the loan list
