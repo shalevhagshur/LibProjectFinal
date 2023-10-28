@@ -119,6 +119,7 @@
 <input class="w3-input w3-border" type="text" id="searchInput" onkeyup="searchBooks()" placeholder="Search for books...">
 
 <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">List of Books</span></h5>
+<h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">cant modify or delete loaned books</span></h5>
 <table id="books-table" class="w3-table w3-striped">
     <thead>
         <tr>
@@ -148,67 +149,64 @@
 <script>
 
 
-// Function to fetch and display books
-function getBooks() {
-    axios.get('/books')
-        .then(response => {
-            const books = response.data;
-            const table = document.getElementById('books-table');
-            const tbody = table.querySelector('tbody'); // Get the table body
+// Add this function to check the loan status for a book
+async function isBookLoaned(bookID) {
+    try {
+        const response = await axios.get(`/books/${bookID}/loanstatus`);
+        return response.data.loaned;
+    } catch (error) {
+        console.error(error);
+        return false; // Default to not loaned if there's an error
+    }
+}
 
-            // Clear the table body before populating it with new data
-            tbody.innerHTML = '';
+// Modify the getBooks function to check the loan status and disable buttons
+async function getBooks() {
+    try {
+        const response = await axios.get('/books');
+        const books = response.data;
+        const table = document.getElementById('books-table');
+        const tbody = table.querySelector('tbody');
 
-            books.forEach(book => {
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = book.bookname; // Display book name
-                row.insertCell(1).textContent = book.bookauthor;
-                row.insertCell(2).textContent = book.year_published;
-                row.insertCell(3).textContent = book.stock;
+        // Clear the table body before populating it with new data
+        tbody.innerHTML = '';
 
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.addEventListener('click', () => deleteBook(book.BookID));
-                row.insertCell(4).appendChild(deleteButton);
+        for (const book of books) {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = book.bookname;
+            row.insertCell(1).textContent = book.bookauthor;
+            row.insertCell(2).textContent = book.year_published;
+            row.insertCell(3).textContent = book.stock;
 
-                const modifyButton = document.createElement('button');
-                modifyButton.textContent = 'Modify';
-                modifyButton.classList.add('modify-book-button'); // Add a class to the button
-                modifyButton.dataset.bookId = book.BookID; // Store book ID as a data attribute
-                
-                // Add an event listener for the "Modify" button, passing the book.BookID
-                
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', () => deleteBook(book.BookID));
+            row.insertCell(4).appendChild(deleteButton);
 
-                row.insertCell(5).appendChild(modifyButton);
+            const modifyButton = document.createElement('button');
+            modifyButton.textContent = 'Modify';
+            modifyButton.classList.add('modify-book-button');
+            modifyButton.dataset.bookId = book.BookID;
+            row.insertCell(5).appendChild(modifyButton);
 
-                // Add an event listener for the "Modify" button, read the book ID from data attribute
-                modifyButton.addEventListener('click', (event) => {
-                // Get the book ID from the data attribute of the modify button
+            // Check the loan status for the book and disable buttons if loaned
+            const isLoaned = await isBookLoaned(book.BookID);
+            if (isLoaned) {
+                modifyButton.disabled = true;
+                deleteButton.disabled = true;
+            }
+
+            modifyButton.addEventListener('click', (event) => {
                 const bookID = event.target.dataset.bookId;
-                // Set the book ID in the hidden input field of the update button
                 document.getElementById('modifyBookID').value = bookID;
-                
-                // Fetch and load the book data into the update table
                 loadBookDataForUpdate(bookID);
-});
-
             });
-        })
-        .catch(error => console.error(error));
+        }
+    } catch (error) {
+        console.error(error);
+    }
 }
 
-function loadBookDataForUpdate(bookID) {
-    axios.get(`/books/${bookID}`)
-        .then(response => {
-            const book = response.data;
-            // Populate the update table with the book's data
-            document.getElementById('modifyTitle').value = book.bookname;
-            document.getElementById('modifyAuthor').value = book.bookauthor;
-            document.getElementById('modifyYear').value = book.year_published;
-            document.getElementById('modifyStock').value = book.stock;
-        })
-        .catch(error => console.error(error));
-}
 
 
 
@@ -261,6 +259,19 @@ function updateBook() {
         .catch(error => console.error(error));
 }
 
+
+function loadBookDataForUpdate(bookID) {
+    axios.get(`/books/${bookID}`)
+        .then(response => {
+            const book = response.data;
+            // Populate the update table with the book's data
+            document.getElementById('modifyTitle').value = book.bookname;
+            document.getElementById('modifyAuthor').value = book.bookauthor;
+            document.getElementById('modifyYear').value = book.year_published;
+            document.getElementById('modifyStock').value = book.stock;
+        })
+        .catch(error => console.error(error));
+}
     
     // Call getBooks() when the page loads
     window.addEventListener('load', getBooks);
@@ -326,8 +337,6 @@ function searchBooks() {
 }
 
     
-    </script>
-    
-
+</script>
 </body>
 </html>

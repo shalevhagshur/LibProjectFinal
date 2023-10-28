@@ -392,6 +392,27 @@ def returned_loans():
 
     return jsonify(returned_loan_data)
 
+#something something
+@app.route('/books/<int:book_id>/loanstatus', methods=['GET'])
+def check_book_loan_status(book_id):
+    book = Book.query.get(book_id)
+    
+    if book:
+        loan = Loan.query.filter_by(BookID=book_id, ReturnDate=None).first()
+        return jsonify({'loaned': loan is not None})
+    else:
+        return jsonify({'error': 'Book not found'}), 404
+
+@app.route('/customers/<int:CustID>/loanstatus', methods=['GET'])
+def check_customer_loan_status(CustID):
+    customer = Customer.query.get(CustID)
+    
+    if customer:
+        loan = Loan.query.filter_by(CustID=CustID, ReturnDate=None).first()
+        return jsonify({'loaned': loan is not None})
+    else:
+        return jsonify({'error': 'Customer not found'}), 404
+
 
 
 if __name__ == '__main__':
