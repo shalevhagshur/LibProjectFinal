@@ -326,7 +326,23 @@ def expired_loans():
     expired_loans = Loan.query.filter(Loan.MaxReturnDate < current_date).all()
 
     # Process the expired loans and return them as needed
-    # ...
+    expired_loan_data = []
+
+    for loan in expired_loans:
+        max_return_date = calculate_max_return_date(loan.LoanDate, loan.LoanType)
+        return_date = loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None
+        loan_data = {
+            'LoanID': loan.LoanID,
+            'CustID': loan.CustID,
+            'BookID': loan.BookID,
+            'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'),
+            'ReturnDate': return_date,
+            'MaxReturnDate': max_return_date,
+            'LoanType': loan.LoanType,
+        }
+        expired_loan_data.append(loan_data)
+
+    return jsonify(expired_loan_data)
 
 @app.route('/loans/not-returned', methods=['GET'])
 def not_returned_loans():
@@ -334,7 +350,23 @@ def not_returned_loans():
     not_returned_loans = Loan.query.filter(Loan.ReturnDate.is_(None)).all()
 
     # Process the not returned loans and return them as needed
-    # ...
+    not_returned_loan_data = []
+
+    for loan in not_returned_loans:
+        max_return_date = calculate_max_return_date(loan.LoanDate, loan.LoanType)
+        return_date = loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None
+        loan_data = {
+            'LoanID': loan.LoanID,
+            'CustID': loan.CustID,
+            'BookID': loan.BookID,
+            'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'),
+            'ReturnDate': return_date,
+            'MaxReturnDate': max_return_date,
+            'LoanType': loan.LoanType,
+        }
+        not_returned_loan_data.append(loan_data)
+
+    return jsonify(not_returned_loan_data)
 
 @app.route('/loans/returned', methods=['GET'])
 def returned_loans():
@@ -342,7 +374,23 @@ def returned_loans():
     returned_loans = Loan.query.filter(Loan.ReturnDate.isnot(None)).all()
 
     # Process the returned loans and return them as needed
-    # ...
+    returned_loan_data = []
+
+    for loan in returned_loans:
+        max_return_date = calculate_max_return_date(loan.LoanDate, loan.LoanType)
+        return_date = loan.ReturnDate.strftime('%Y-%m-%d %H:%M:%S') if loan.ReturnDate else None
+        loan_data = {
+            'LoanID': loan.LoanID,
+            'CustID': loan.CustID,
+            'BookID': loan.BookID,
+            'LoanDate': loan.LoanDate.strftime('%Y-%m-%d %H:%M:%S'),
+            'ReturnDate': return_date,
+            'MaxReturnDate': max_return_date,
+            'LoanType': loan.LoanType,
+        }
+        returned_loan_data.append(loan_data)
+
+    return jsonify(returned_loan_data)
 
 
 

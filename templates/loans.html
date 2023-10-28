@@ -153,6 +153,16 @@
     <table id="loans-table" class="w3-table w3-striped">
         <thead>
             <tr>
+                <div id="loanListContainer"></div>
+                    <label for="loanListSelector">Select Loan List:</label>
+                    <select id="loanListSelector">
+                      <option value="all">All Loans</option>
+                      <option value="expired">Expired Loans</option>
+                      <option value="not-returned">Not Returned Loans</option>
+                      <option value="returned">Returned Loans</option>
+                    </select>
+                  </div>
+                   
               <th>Customer Name</th>
               <th>Book Name</th>
               <th>Loan Date</th>
@@ -214,7 +224,7 @@
       document.getElementById('modifyLoanID').value = '';
 
       // Refresh the loan list
-      getLoans();
+      getLoans(); // Add this line to refresh the loan list
     })
     .catch(error => console.error(error));
 }
@@ -380,12 +390,12 @@
     window.addEventListener('load', getLoans);
     
     // Function to delete a loan
- function deleteLoan(loanID) {
+    function deleteLoan(loanID) {
   axios.delete(`/loans/${loanID}`)
     .then(response => {
       if (response.data.done === 'success') {
         alert('Loan deleted successfully');
-        getLoans(); // Reload the data to reflect the changes
+        getLoans(); // Refresh the loan list after deletion
       } else {
         alert('Error: ' + response.data.error);
       }
@@ -556,7 +566,7 @@
       if (response.data.done === 'success') {
         // Book returned successfully
         alert('Book returned successfully');
-        // You may also update the loan list or take other actions as needed
+        getLoans(); // Refresh the loan list after returning the book
       } else if (response.status === 400 && response.data.error === 'Loan has already been returned') {
         alert("Can't Return A Book That Has Already Been Returned");
       } else if (response.status === 404 && response.data.error === 'Loan not found') {
@@ -566,7 +576,7 @@
       } else if (response.status === 400 && response.data.error === 'Loan has been returned') {
         alert("Can't Return A Book That Has Already Been Returned");
       } else {
-        alert('Cant Return A Book That Has Already Been Returned');
+        alert("Can't Return A Book That Has Already Been Returned");
       }
     })
     .catch(error => {
@@ -578,12 +588,128 @@
 
 
 
-document.getElementById('returnBookButton').addEventListener('click', function () {
-    const loanID = this.dataset.loanId; // Retrieve the loan ID from the button's data attribute
-    returnBook(loanID);
+// Function to render the simplified loans list in an HTML table
+function renderLoansList(loans) {
+  const table = document.getElementById('loans-table');
+  const tbody = table.querySelector('tbody');
+
+  tbody.innerHTML = ''; // Clear the table body
+
+  loans.forEach(loan => {
+    const row = tbody.insertRow();
+    const cellCustomerName = row.insertCell(0);
+    const cellBookName = row.insertCell(1);
+    const cellLoanDate = row.insertCell(2);
+    const cellReturnDate = row.insertCell(3);
+    const cellLoantime = row.insertCell(4);
+    const cellActions = row.insertCell(5);
+
+    // Fetch and display customer name
+    getCustomerName(loan.CustID).then(CustName => {
+      cellCustomerName.textContent = CustName; // Customer Name
+    });
+
+    // Fetch and display book name
+    getBookName(loan.BookID).then(bookname => {
+      cellBookName.textContent = bookname; // Book Name
+    });
+
+    // Display loan date
+    cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
+
+    // Display return date or a placeholder
+    if (loan.ReturnDate) {
+      cellReturnDate.textContent = loan.ReturnDate;
+    } else {
+      cellReturnDate.textContent = 'Not returned yet';
+    }
+
+    // Display loan time
+    const loanTypeText = getLoanTypeText(loan.LoanType);
+    cellLoantime.textContent = loanTypeText; // Loan Time
+
+    // Add the "Modify" button
+    const modifyButton = document.createElement('button');
+    modifyButton.textContent = 'Modify';
+    modifyButton.classList.add('modify-loan-button');
+    modifyButton.dataset.loanId = loan.LoanID;
+
+    modifyButton.addEventListener('click', (event) => {
+      const loanID = event.target.dataset.loanId;
+      setLoanIDForModification(loanID);
+    });
+
+    // Add the "Return Book" button
+    const returnBookButton = document.createElement('button');
+    returnBookButton.textContent = 'Return Book';
+    returnBookButton.classList.add('return-book-button');
+    returnBookButton.dataset.loanId = loan.LoanID;
+
+    returnBookButton.addEventListener('click', (event) => {
+      const loanID = event.target.dataset.loanId;
+      returnBook(loanID);
+    });
+
+    // Add the "Delete Loan" button
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete Loan';
+    deleteButton.classList.add('delete-loan-button');
+    deleteButton.dataset.loanId = loan.LoanID;
+
+    deleteButton.addEventListener('click', (event) => {
+      const loanID = event.target.dataset.loanId;
+      if (!loan.ReturnDate) {
+        alert("Can't delete a loan that hasn't been returned yet.");
+      } else {
+        deleteLoan(loanID);
+      }
+    });
+
+    cellActions.appendChild(modifyButton);
+    cellActions.appendChild(returnBookButton);
+    cellActions.appendChild(deleteButton);
+  });
+}
+
+
+// Get a reference to the select element and the container div
+const loanListSelector = document.getElementById('loanListSelector');
+const loanListContainer = document.getElementById('loanListContainer');
+
+// Add an event listener to the select element
+loanListSelector.addEventListener('change', () => {
+  const selectedOption = loanListSelector.value;
+  loadLoansList(selectedOption);
 });
 
-    
+// Function to load the selected loans list
+function loadLoansList(selectedOption) {
+  // Clear the container before loading a new list
+  loanListContainer.innerHTML = '';
+
+  // Define the URL based on the selected option
+  let url = '/loans';
+  if (selectedOption === 'expired') {
+    url = '/loans/expired';
+  } else if (selectedOption === 'not-returned') {
+    url = '/loans/not-returned';
+  } else if (selectedOption === 'returned') {
+    url = '/loans/returned';
+  }
+
+  // Make an AJAX request to get the loans data
+  axios.get(url)
+    .then(response => {
+      const loans = response.data;
+
+      // Render the loans list in the container
+      renderLoansList(loans);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+}
+
     </script>
     
 </html> 
