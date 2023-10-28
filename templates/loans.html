@@ -76,7 +76,6 @@
 
     <!-- Example Loan List (Replace with your actual loan list) -->
     <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Add New Loan</span></h5>
-    <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Add New Loan</span></h5>
     <table class="w3-table w3-striped">
       <tr>
         <th>Customer ID</th>
@@ -108,9 +107,10 @@
         </td>
         <td>
           <select class="w3-select" id="newLoanType">
-            <option value="1">Type 1</option>
-            <option value="2">Type 2</option>
-            <option value="3">Type 3</option>
+            <option value="" disabled selected>Loan Time</option>
+            <option value="1">10 days</option>
+            <option value="2">5 days</option>
+            <option value="3">2 days</option>
           </select>
         </td>
         <td>
@@ -269,16 +269,17 @@
   // Call getLoans() when the page loads
   window.addEventListener('load', getLoans);
 
-  // Function to add a new loan
-  function addLoan() {
-  const custID = document.getElementById('newCustID').value;
-  const bookID = document.getElementById('bookSelect').value;
-  const loanType = document.getElementById('newLoanType').value;
 
-  // Check if any field is empty
-  if (!custID || !bookID || !loanType) {
-    alert('All Fields Must Be Filled For Adding A Loan');
-    return false; // Stop execution if any field is missing
+// Function to add a new loan
+function addLoan() {
+  const custID = parseInt(document.getElementById('selectedCustomerID').value, 10);
+  const bookID = parseInt(document.getElementById('selectedBookID').value, 10);
+  const loanType = parseInt(document.getElementById('newLoanType').value, 10);
+
+  // Check if any field is empty or if the conversion to integer fails
+  if (!custID || !bookID || !loanType || isNaN(custID) || isNaN(bookID) || isNaN(loanType)) {
+    alert('All Fields Must Be Filled, and Customer ID, Book ID, and Loan Type must be valid numbers.');
+    return false; // Stop execution if any field is missing or has an invalid number
   }
 
   const newLoan = {
@@ -290,9 +291,12 @@
   axios.post('/loans', newLoan)
     .then(response => {
       if (response.data.done === 'success') {
-        document.getElementById('newCustID').value = '';
-        document.getElementById('bookSelect').value = '';
+        // Reset the fields and set "Select a customer" and "Select a book" as defaults
+        document.getElementById('selectedCustomerID').value = '';
+        document.getElementById('selectedBookID').value = '';
         document.getElementById('newLoanType').value = '';
+        document.getElementById('customerSelect').selectedIndex = 0; // Set "Select a customer" as default
+        document.getElementById('bookSelect').selectedIndex = 0; // Set "Select a book" as default
         getLoans();
       } else {
         console.error(response.data.error);
