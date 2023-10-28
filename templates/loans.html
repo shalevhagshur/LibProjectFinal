@@ -122,27 +122,29 @@
     
 
     <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Modify Existing Loan</span></h5>
-    <table class="w3-table w3-striped">
-      <tr>
-        <th>Loan Type</th>
-        <th>Loan Date</th> <!-- Change "Loan Date" here -->
-        <th>Actions</th>
-      </tr>
-      <tr>
-        <td>
-          <select class="w3-select" id="modifyLoanType">
-            <option value="1">Type 1</option>
-            <option value="2">Type 2</option>
-            <option value="3">Type 3</option>
-          </select>
-        </td>
-        <td><input class="w3-input" type="datetime-local" id="modifyLoanDate" disabled></td> <!-- Change the input ID to "modifyLoanDate" -->
-        <td>
-          <input type="hidden" id="modifyLoanID"> <!-- Hidden field to store loan ID -->
-          <button id="update-loan-button" class="w3-button w3-black" onclick="updateLoan()">Update</button>
-        </td>
-      </tr>
-    </table>
+    <form id="modifyLoanForm">
+        <h5 class="w3-center w3-padding-32">
+          <span class="w3-tag w3-wide">Modify Existing Loan</span>
+        </h5>
+        <table class="w3-table w3-striped">
+          <tr>
+            <td>
+              <select class="w3-select" id="modifyLoanType">
+                <option value="1">Type 1</option>
+                <option value="2">Type 2</option>
+                <option value="3">Type 3</option>
+              </select>
+            </td>
+            <td>
+              <input class="w3-input" type="datetime-local" id="modifyLoanDate" disabled>
+            </td>
+            <td>
+              <input type="hidden" id="modifyLoanID">
+              <button id="update-loan-button" class="w3-button w3-black" type="button" onclick="updateLoan()">Update</button>
+            </td>
+          </tr>
+        </table>
+      </form>
 
     <h5 class="w3-center w3-padding-32"><span class="w3-tag w3-wide">Search for Loans</span></h5>
     <input class="w3-input w3-border" type="text" id="searchInput" onkeyup="searchLoans()" placeholder="Search for loans...">
@@ -176,210 +178,28 @@
 
 <script>
 
-// Function to fetch and display loans
-// Define the getLoanTypeText function
-function getLoanTypeText(loanType) {
-  if (loanType === 1) return '10 days';
-  if (loanType === 2) return '5 days';
-  if (loanType === 3) return '2 days';
-  return 'Unknown';
-}
-
-// Modify the updateLoan function to accept loanID as a parameter
-function updateLoan(loanID) {
-  const updatedLoan = {
-    LoanType: parseInt(document.getElementById('modifyLoanType').value, 10),
-    LoanDate: document.getElementById('modifyLoanDate').value,
-  };
-
-  // Check if loanID is not empty
-  if (!loanID) {
-    alert('In Order To Update A Loan, Choose Which Loan To Modify First Using The Modify Button');
-    return;
-  }
-
-  // Use the loanID to update the loan using the PUT route
-  axios.put(`/loans/${loanID}`, updatedLoan)
-    .then(() => {
-      // Clear the form fields after the update
-      document.getElementById('modifyLoanType').value = '';
-      document.getElementById('modifyLoanDate').value = '';
-      document.getElementById('modifyLoanID').value = '';
-
-      // Refresh the loan list
-      getLoans();
-    })
-    .catch(error => console.error(error));
-}
-
-// Function to fetch and display loans with customer and book names
-function getLoans() {
-  axios.get('/loans')
-    .then(response => {
-      const loans = response.data;
-      const table = document.getElementById('loans-table');
-      const tbody = table.querySelector('tbody'); // Get the table body
-
-      // Clear the table body before populating it with new data
-      tbody.innerHTML = '';
-
-      loans.forEach(loan => {
-        const row = tbody.insertRow();
-        
-        // Create all the cells for the row
-        const cellCustomerName = row.insertCell(0);
-        const cellBookName = row.insertCell(1);
-        const cellLoanDate = row.insertCell(2);
-        const cellReturnDate = row.insertCell(3);
-        const cellLoantime = row.insertCell(4);
-        const cellActions = row.insertCell(5);
-
-        // Fetch and display customer name
-        getCustomerName(loan.CustID).then(CustName => {
-          cellCustomerName.textContent = CustName; // Customer Name
-        });
-
-        // Fetch and display book name
-        getBookName(loan.BookID).then(bookname => {
-          cellBookName.textContent = bookname; // Book Name
-        });
-
-        // Display loan date
-        cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
-
-        // Display return date or a placeholder
-        if (loan.ReturnDate) {
-          cellReturnDate.textContent = loan.ReturnDate;
-        } else {
-          cellReturnDate.textContent = 'Not returned yet';
-        }
-
-        // Display loan type as "10 days," "5 days," or "2 days" in cellLoantime
-        const loanTypeText = getLoanTypeText(loan.LoanType);
-        cellLoantime.textContent = loanTypeText; // Loan Time
-
-        // Hide the actual book ID, customer ID, and loan type as hidden fields
-        const hiddenBookID = document.createElement('input');
-        hiddenBookID.type = 'hidden';
-        hiddenBookID.value = loan.BookID || ''; // Check for null values
-        row.appendChild(hiddenBookID);
-
-        const hiddenCustID = document.createElement('input');
-        hiddenCustID.type = 'hidden';
-        hiddenCustID.value = loan.CustID || ''; // Check for null values
-        row.appendChild(hiddenCustID);
-
-        const hiddenLoanType = document.createElement('input');
-        hiddenLoanType.type = 'hidden';
-        hiddenLoanType.value = loan.LoanType || ''; // Check for null values
-        row.appendChild(hiddenLoanType);
-
-        const modifyButton = document.createElement('button');
-        modifyButton.textContent = 'Modify';
-        modifyButton.classList.add('modify-loan-button'); // Add a class to the button
-        modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
-
-        // Add an event listener for the "Modify" button, passing the loan.LoanID
-        modifyButton.addEventListener('click', (event) => {
-          const loanID = event.target.dataset.loanId;
-          updateLoan(loanID);
-        });
-
-        cellActions.appendChild(modifyButton); // Actions
-      });
-    })
-    .catch(error => {
-      console.error(error);
-      // Handle the error, e.g., display an error message to the user
-    });
-}
-
-
-
-// Helper function to fetch and display customer name by ID
-function getCustomerName(CustID) {
-  return axios.get(`/customers/${CustID}`)
-    .then(customerResponse => {
-      if (customerResponse.status === 200) {
-        return customerResponse.data.CustName || 'Unknown'; // Use CustName as the property
-      } else {
-        return 'Customer not found';
-      }
-    })
-    .catch(customerError => {
-      console.error('Error fetching customer:', customerError);
-      return 'Error fetching customer';
-    });
-}
-
-// Helper function to fetch and display book name by ID
-function getBookName(BookID) {
-  return axios.get(`/books/${BookID}`)
-    .then(bookResponse => {
-      if (bookResponse.status === 200) {
-        return bookResponse.data.bookname || 'Unknown';
-      } else {
-        return 'Book not found';
-      }
-    })
-    .catch(bookError => {
-      console.error('Error fetching book:', bookError);
-      return 'Error fetching book';
-    });
-}
-
-// Helper function to fetch and display loan type text
-function getLoanTypeText(loanType) {
-  if (loanType === 1) return '10 days';
-  if (loanType === 2) return '5 days';
-  if (loanType === 3) return '2 days';
-  return 'Unknown';
-}
-
-
-
-// Call getLoans() when the page loads
-window.addEventListener('load', getLoans);
-
-// Assuming you have a loan object or variable defined earlier in your code
-
-// axios.get(`/loans/${loan.loanID}`)
-//   .then(response => {
-//     const loan = response.data; // Define loan here
-//     // Populate the update table with the loan's data
-//     document.getElementById('modifyLoanType').value = loan.LoanType;
-//     document.getElementById('modifyLoanDate').value = loan.LoanDate;
-//   })
-//   .catch(error => console.error(error));
-
-
-// row.insertCell(cellIndex++).appendChild(modifyButton);
-
-
-  // Function to delete a loan
-  function deleteLoan(loanID) {
-    axios.delete(`/loans/${loanID}`)
-      .then(() => {
-        getLoans();
-      })
-      .catch(error => console.error(error));
-  }
-
-  // Modify the updateLoan function to accept loanID as a parameter
-  function updateLoan() {
-    document.getElementById('update-loan-button').addEventListener('click', function () {
-      const loanID = document.getElementById('modifyLoanID').value;
+    // Function to fetch and display loans
+    // Define the getLoanTypeText function
+    function getLoanTypeText(loanType) {
+      if (loanType === 1) return '10 days';
+      if (loanType === 2) return '5 days';
+      if (loanType === 3) return '2 days';
+      return 'Unknown';
+    }
+    
+    // Modify the updateLoan function to accept loanID as a parameter
+    function updateLoan(loanID) {
       const updatedLoan = {
         LoanType: parseInt(document.getElementById('modifyLoanType').value, 10),
         LoanDate: document.getElementById('modifyLoanDate').value,
       };
-
-      // Check if loanID is not empty
-      if (!loanID) {
-        alert('In Order To Update A Loan, Choose Which Loan To Modify First Using The Modify Button');
+    
+      // Check if any field is empty
+      if (!updatedLoan.LoanType || !updatedLoan.LoanDate) {
+        alert('Missing Fields Found, Make Sure All Fields Are Filled');
         return;
       }
-
+    
       // Use the loanID to update the loan using the PUT route
       axios.put(`/loans/${loanID}`, updatedLoan)
         .then(() => {
@@ -387,146 +207,301 @@ window.addEventListener('load', getLoans);
           document.getElementById('modifyLoanType').value = '';
           document.getElementById('modifyLoanDate').value = '';
           document.getElementById('modifyLoanID').value = '';
-
+    
           // Refresh the loan list
           getLoans();
         })
         .catch(error => console.error(error));
-    });
-  }
-
-  // Call getLoans() when the page loads
-  window.addEventListener('load', getLoans);
-
-
-// Function to add a new loan
-function addLoan() {
-  const custID = parseInt(document.getElementById('selectedCustomerID').value, 10);
-  const bookID = parseInt(document.getElementById('selectedBookID').value, 10);
-  const loanType = parseInt(document.getElementById('newLoanType').value, 10);
-
-  // Check if any field is empty or if the conversion to integer fails
-  if (!custID || !bookID || !loanType || isNaN(custID) || isNaN(bookID) || isNaN(loanType)) {
-    alert('All Fields Must Be Filled, and Customer ID, Book ID, and Loan Type must be valid numbers.');
-    return false; // Stop execution if any field is missing or has an invalid number
-  }
-
-  const newLoan = {
-    CustID: custID,
-    BookID: bookID,
-    LoanType: loanType,
-  };
-
-  axios.post('/loans', newLoan)
-    .then(response => {
-      if (response.data.done === 'success') {
-        // Reset the fields and set "Select a customer" and "Select a book" as defaults
-        document.getElementById('selectedCustomerID').value = '';
-        document.getElementById('selectedBookID').value = '';
-        document.getElementById('newLoanType').value = '';
-        document.getElementById('customerSelect').selectedIndex = 0; // Set "Select a customer" as default
-        document.getElementById('bookSelect').selectedIndex = 0; // Set "Select a book" as default
-        getLoans();
-      } else {
-        console.error(response.data.error);
-      }
-    })
-    .catch(error => console.error(error));
-
-  return false; // Prevent default form submission behavior
-}
-
-
-  // Change 'loansTable' to 'loans-table' to match the HTML table ID
-  function searchLoans() {
-    let input, filter, table, tr, td, i, txtValue;
-    input = document.getElementById('searchInput');
-    filter = input.value.toUpperCase();
-    table = document.getElementById('loans-table'); // Change 'loansTable' to 'loans-table'
-    tr = table.getElementsByTagName('tr');
-
-    for (i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
-      td = tr[i].getElementsByTagName('td')[0]; // Assuming the
-
-      for (let j = 0; j < 5; j++) {
-        td = tr[i].getElementsByTagName('td')[j];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = '';
-            break;
+    }
+    
+    // Function to fetch and display loans with customer and book names
+    function getLoans() {
+      axios.get('/loans')
+        .then(response => {
+          const loans = response.data;
+          const table = document.getElementById('loans-table');
+          const tbody = table.querySelector('tbody'); // Get the table body
+    
+          // Clear the table body before populating it with new data
+          tbody.innerHTML = '';
+    
+          loans.forEach(loan => {
+            const row = tbody.insertRow();
+            
+            // Create all the cells for the row
+            const cellCustomerName = row.insertCell(0);
+            const cellBookName = row.insertCell(1);
+            const cellLoanDate = row.insertCell(2);
+            const cellReturnDate = row.insertCell(3);
+            const cellLoantime = row.insertCell(4);
+            const cellActions = row.insertCell(5);
+    
+            // Fetch and display customer name
+            getCustomerName(loan.CustID).then(CustName => {
+              cellCustomerName.textContent = CustName; // Customer Name
+            });
+    
+            // Fetch and display book name
+            getBookName(loan.BookID).then(bookname => {
+              cellBookName.textContent = bookname; // Book Name
+            });
+    
+            // Display loan date
+            cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
+    
+            // Display return date or a placeholder
+            if (loan.ReturnDate) {
+              cellReturnDate.textContent = loan.ReturnDate;
+            } else {
+              cellReturnDate.textContent = 'Not returned yet';
+            }
+    
+            // Display loan type as "10 days," "5 days," or "2 days" in cellLoantime
+            const loanTypeText = getLoanTypeText(loan.LoanType);
+            cellLoantime.textContent = loanTypeText; // Loan Time
+    
+            // Hide the actual book ID, customer ID, and loan type as hidden fields
+            const hiddenBookID = document.createElement('input');
+            hiddenBookID.type = 'hidden';
+            hiddenBookID.value = loan.BookID || ''; // Check for null values
+            row.appendChild(hiddenBookID);
+    
+            const hiddenCustID = document.createElement('input');
+            hiddenCustID.type = 'hidden';
+            hiddenCustID.value = loan.CustID || ''; // Check for null values
+            row.appendChild(hiddenCustID);
+    
+            const hiddenLoanType = document.createElement('input');
+            hiddenLoanType.type = 'hidden';
+            hiddenLoanType.value = loan.LoanType || ''; // Check for null values
+            row.appendChild(hiddenLoanType);
+    
+            const modifyButton = document.createElement('button');
+            modifyButton.textContent = 'Modify';
+            modifyButton.classList.add('modify-loan-button'); // Add a class to the button
+            modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
+    
+            // Add an event listener for the "Modify" button, passing the loan.LoanID
+            modifyButton.addEventListener('click', (event) => {
+              const loanID = event.target.dataset.loanId;
+              setLoanIDForModification(loanID);
+            });
+    
+            cellActions.appendChild(modifyButton); // Actions
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          // Handle the error, e.g., display an error message to the user
+        });
+    }
+    
+    // Helper function to fetch and display customer name by ID
+    function getCustomerName(CustID) {
+      return axios.get(`/customers/${CustID}`)
+        .then(customerResponse => {
+          if (customerResponse.status === 200) {
+            return customerResponse.data.CustName || 'Unknown'; // Use CustName as the property
           } else {
-            tr[i].style.display = 'none';
+            return 'Customer not found';
+          }
+        })
+        .catch(customerError => {
+          console.error('Error fetching customer:', customerError);
+          return 'Error fetching customer';
+        });
+    }
+    
+    // Helper function to fetch and display book name by ID
+    function getBookName(BookID) {
+      return axios.get(`/books/${BookID}`)
+        .then(bookResponse => {
+          if (bookResponse.status === 200) {
+            return bookResponse.data.bookname || 'Unknown';
+          } else {
+            return 'Book not found';
+          }
+        })
+        .catch(bookError => {
+          console.error('Error fetching book:', bookError);
+          return 'Error fetching book';
+        });
+    }
+    
+    // Helper function to fetch and display loan type text
+    function getLoanTypeText(loanType) {
+      if (loanType === 1) return '10 days';
+      if (loanType === 2) return '5 days';
+      if (loanType === 3) return '2 days';
+      return 'Unknown';
+    }
+    
+    // Call getLoans() when the page loads
+    window.addEventListener('load', getLoans);
+    
+    // Function to delete a loan
+    function deleteLoan(loanID) {
+      axios.delete(`/loans/${loanID}`)
+        .then(() => {
+          getLoans();
+        })
+        .catch(error => console.error(error));
+    }
+    
+    // Function to set the LoanID for modification
+    function setLoanIDForModification(loanID) {
+      // Populate the Loan Type and Loan Date fields and set the LoanID
+      const modifyLoanTypeInput = document.getElementById('modifyLoanType');
+      const modifyLoanDateInput = document.getElementById('modifyLoanDate');
+      const modifyLoanIDInput = document.getElementById('modifyLoanID');
+    
+      // Use the loanID to fetch the loan details and populate the fields
+      axios.get(`/loans/${loanID}`)
+        .then(response => {
+          const loan = response.data;
+          if (loan) {
+            modifyLoanTypeInput.value = loan.LoanType;
+            modifyLoanDateInput.value = loan.LoanDate;
+            modifyLoanIDInput.value = loanID;
+          } else {
+            console.error('Loan not found');
+          }
+        })
+        .catch(error => console.error(error));
+    }
+    
+    // Add an event listener to handle "Modify" button clicks
+    document.getElementById('update-loan-button').addEventListener('click', () => {
+      const loanID = document.getElementById('modifyLoanID').value;
+      updateLoan(loanID);
+    });
+    
+    // Call getLoans() when the page loads
+    window.addEventListener('load', getLoans);
+    
+    // Function to add a new loan
+    function addLoan() {
+      const custID = parseInt(document.getElementById('selectedCustomerID').value, 10);
+      const bookID = parseInt(document.getElementById('selectedBookID').value, 10);
+      const loanType = parseInt(document.getElementById('newLoanType').value, 10);
+    
+      // Check if any field is empty or if the conversion to integer fails
+      if (!custID || !bookID || !loanType || isNaN(custID) || isNaN(bookID) || isNaN(loanType)) {
+        alert('All Fields Must Be Filled, and Customer ID, Book ID, and Loan Type must be valid numbers.');
+        return false; // Stop execution if any field is missing or has an invalid number
+      }
+    
+      const newLoan = {
+        CustID: custID,
+        BookID: bookID,
+        LoanType: loanType,
+      };
+    
+      axios.post('/loans', newLoan)
+        .then(response => {
+          if (response.data.done === 'success') {
+            // Reset the fields and set "Select a customer" and "Select a book" as defaults
+            document.getElementById('selectedCustomerID').value = '';
+            document.getElementById('selectedBookID').value = '';
+            document.getElementById('newLoanType').value = '';
+            document.getElementById('customerSelect').selectedIndex = 0; // Set "Select a customer" as default
+            document.getElementById('bookSelect').selectedIndex = 0; // Set "Select a book" as default
+            getLoans();
+          } else {
+            console.error(response.data.error);
+          }
+        })
+        .catch(error => console.error(error));
+    
+      return false; // Prevent default form submission behavior
+    }
+    
+    // Change 'loansTable' to 'loans-table' to match the HTML table ID
+    function searchLoans() {
+      let input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById('searchInput');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('loans-table'); // Change 'loansTable' to 'loans-table'
+      tr = table.getElementsByTagName('tr');
+    
+      for (i = 1; i < tr.length; i++) { // Start from 1 to skip the table header row
+        td = tr[i].getElementsByTagName('td')[0]; // Assuming the
+    
+        for (let j = 0; j < 5; j++) {
+          td = tr[i].getElementsByTagName('td')[j];
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = '';
+              break;
+            } else {
+              tr[i].style.display = 'none';
+            }
           }
         }
       }
     }
-  }
-
-
-// Function to fetch and display books
-function getAvailableBooks() {
-  axios.get('/books')
-    .then(response => {
-      const books = response.data;
+    
+    // Function to fetch and display books
+    function getAvailableBooks() {
+      axios.get('/books')
+        .then(response => {
+          const books = response.data;
+          const bookSelect = document.getElementById('bookSelect');
+    
+          books.forEach(book => {
+            if (book.stock > 0) {
+              const option = document.createElement('option');
+              option.value = book.BookID;
+              option.textContent = book.bookname; // Set the BookName as the text content
+              bookSelect.appendChild(option);
+            }
+          });
+        })
+        .catch(error => console.error(error));
+    }
+    
+    // Function to update the selectedBookID when an option is chosen
+    function updateSelectedBookID() {
       const bookSelect = document.getElementById('bookSelect');
-
-      books.forEach(book => {
-        if (book.stock > 0) {
-          const option = document.createElement('option');
-          option.value = book.BookID;
-          option.textContent = book.bookname; // Set the BookName as the text content
-          bookSelect.appendChild(option);
-        }
-      });
-    })
-    .catch(error => console.error(error));
-}
-
-// Function to update the selectedBookID when an option is chosen
-function updateSelectedBookID() {
-  const bookSelect = document.getElementById('bookSelect');
-  const selectedBookID = document.getElementById('selectedBookID');
-  
-  const selectedOption = bookSelect.options[bookSelect.selectedIndex];
-  selectedBookID.value = selectedOption.value;
-}
-
-// Call getAvailableBooks after the page has fully loaded
-window.addEventListener('load', getAvailableBooks);
-
-
-
-// Function to fetch and display customers
-function getAvailableCustomers() {
-  axios.get('/customers')
-    .then(response => {
-      const customers = response.data;
+      const selectedBookID = document.getElementById('selectedBookID');
+      
+      const selectedOption = bookSelect.options[bookSelect.selectedIndex];
+      selectedBookID.value = selectedOption.value;
+    }
+    
+    // Call getAvailableBooks after the page has fully loaded
+    window.addEventListener('load', getAvailableBooks);
+    
+    // Function to fetch and display customers
+    function getAvailableCustomers() {
+      axios.get('/customers')
+        .then(response => {
+          const customers = response.data;
+          const customerSelect = document.getElementById('customerSelect');
+    
+          customers.forEach(customer => {
+            const option = document.createElement('option');
+            option.value = customer.CustID;
+            option.textContent = customer.CustName; // Set the full customer name as text content
+            customerSelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error(error));
+    }
+    
+    // Call getAvailableCustomers after the page has fully loaded
+    window.addEventListener('load', getAvailableCustomers);
+    
+    // Function to update the selectedCustomerID when a customer is chosen
+    function updateSelectedCustomerID() {
       const customerSelect = document.getElementById('customerSelect');
-
-      customers.forEach(customer => {
-        const option = document.createElement('option');
-        option.value = customer.CustID;
-        option.textContent = customer.CustName; // Set the full customer name as text content
-        customerSelect.appendChild(option);
-      });
-    })
-    .catch(error => console.error(error));
-}
-
-// Call getAvailableCustomers after the page has fully loaded
-window.addEventListener('load', getAvailableCustomers);
-
-// Function to update the selectedCustomerID when a customer is chosen
-function updateSelectedCustomerID() {
-  const customerSelect = document.getElementById('customerSelect');
-  const selectedCustomerID = document.getElementById('selectedCustomerID');
-
-  const selectedOption = customerSelect.options[customerSelect.selectedIndex];
-  selectedCustomerID.value = selectedOption.value;
-}
-
-
-
-</script>
+      const selectedCustomerID = document.getElementById('selectedCustomerID');
+    
+      const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+      selectedCustomerID.value = selectedOption.value;
+    }
+    
+    </script>
+    
 </html> 
