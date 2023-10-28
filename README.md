@@ -8,9 +8,9 @@ A web-based Library Management System built with Flask and SQLAlchemy.
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
+- [APIEndpoints](#API-end-point)
+- [Images](#Images-from-the-website)
+
 
 ## Introduction
 
@@ -65,8 +65,8 @@ The Library Management System is a web application that allows you to manage boo
 
 3. Use the API endpoints for advanced control and integration.
 
-### API end point
-
+### API end point:
+-
 Books:
 
 - GET /books: Get a list of all books or create a new book.
@@ -86,7 +86,7 @@ Books:
 - GET /loans/not-returned: Get a list of loans not yet returned.
 - GET /loans/returned: Get a list of returned loans.
 
-### Images from the website
+### Images from the website:
 
 ![Screenshot 1](screenshots/homepage.png)
 
