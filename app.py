@@ -317,5 +317,34 @@ def return_loan(id):
             return jsonify({'error': 'Loan not found'}), 404
 
 
+#some Extra Shit for loans
+
+@app.route('/loans/expired', methods=['GET'])
+def expired_loans():
+    # Get expired loans
+    current_date = datetime.utcnow()
+    expired_loans = Loan.query.filter(Loan.MaxReturnDate < current_date).all()
+
+    # Process the expired loans and return them as needed
+    # ...
+
+@app.route('/loans/not-returned', methods=['GET'])
+def not_returned_loans():
+    # Get loans that haven't been returned
+    not_returned_loans = Loan.query.filter(Loan.ReturnDate.is_(None)).all()
+
+    # Process the not returned loans and return them as needed
+    # ...
+
+@app.route('/loans/returned', methods=['GET'])
+def returned_loans():
+    # Get loans that have been returned
+    returned_loans = Loan.query.filter(Loan.ReturnDate.isnot(None)).all()
+
+    # Process the returned loans and return them as needed
+    # ...
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

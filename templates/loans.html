@@ -223,85 +223,118 @@
     
     // Function to fetch and display loans with customer and book names
     function getLoans() {
-      axios.get('/loans')
-        .then(response => {
-          const loans = response.data;
-          const table = document.getElementById('loans-table');
-          const tbody = table.querySelector('tbody'); // Get the table body
-    
-          // Clear the table body before populating it with new data
-          tbody.innerHTML = '';
-    
-          loans.forEach(loan => {
-            const row = tbody.insertRow();
-            
-            // Create all the cells for the row
-            const cellCustomerName = row.insertCell(0);
-            const cellBookName = row.insertCell(1);
-            const cellLoanDate = row.insertCell(2);
-            const cellReturnDate = row.insertCell(3);
-            const cellLoantime = row.insertCell(4);
-            const cellActions = row.insertCell(5);
-    
-            // Fetch and display customer name
-            getCustomerName(loan.CustID).then(CustName => {
-              cellCustomerName.textContent = CustName; // Customer Name
-            });
-    
-            // Fetch and display book name
-            getBookName(loan.BookID).then(bookname => {
-              cellBookName.textContent = bookname; // Book Name
-            });
-    
-            // Display loan date
-            cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
-    
-            // Display return date or a placeholder
-            if (loan.ReturnDate) {
-              cellReturnDate.textContent = loan.ReturnDate;
-            } else {
-              cellReturnDate.textContent = 'Not returned yet';
-            }
-    
-            // Display loan type as "10 days," "5 days," or "2 days" in cellLoantime
-            const loanTypeText = getLoanTypeText(loan.LoanType);
-            cellLoantime.textContent = loanTypeText; // Loan Time
-    
-            // Hide the actual book ID, customer ID, and loan type as hidden fields
-            const hiddenBookID = document.createElement('input');
-            hiddenBookID.type = 'hidden';
-            hiddenBookID.value = loan.BookID || ''; // Check for null values
-            row.appendChild(hiddenBookID);
-    
-            const hiddenCustID = document.createElement('input');
-            hiddenCustID.type = 'hidden';
-            hiddenCustID.value = loan.CustID || ''; // Check for null values
-            row.appendChild(hiddenCustID);
-    
-            const hiddenLoanType = document.createElement('input');
-            hiddenLoanType.type = 'hidden';
-            hiddenLoanType.value = loan.LoanType || ''; // Check for null values
-            row.appendChild(hiddenLoanType);
-    
-            const modifyButton = document.createElement('button');
-            modifyButton.textContent = 'Modify';
-            modifyButton.classList.add('modify-loan-button'); // Add a class to the button
-            modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
-    
-            // Add an event listener for the "Modify" button, passing the loan.LoanID
-            modifyButton.addEventListener('click', (event) => {
-              const loanID = event.target.dataset.loanId;
-              setLoanIDForModification(loanID);
-            });
-    
-            cellActions.appendChild(modifyButton); // Actions
-          });
-        })
-        .catch(error => {
-          console.error(error);
-          // Handle the error, e.g., display an error message to the user
+  axios.get('/loans')
+    .then(response => {
+      const loans = response.data;
+      const table = document.getElementById('loans-table');
+      const tbody = table.querySelector('tbody'); // Get the table body
+
+      // Clear the table body before populating it with new data
+      tbody.innerHTML = '';
+
+      loans.forEach(loan => {
+        const row = tbody.insertRow();
+
+        // Create all the cells for the row
+        const cellCustomerName = row.insertCell(0);
+        const cellBookName = row.insertCell(1);
+        const cellLoanDate = row.insertCell(2);
+        const cellReturnDate = row.insertCell(3);
+        const cellLoantime = row.insertCell(4);
+        const cellActions = row.insertCell(5);
+
+        // Fetch and display customer name
+        getCustomerName(loan.CustID).then(CustName => {
+          cellCustomerName.textContent = CustName; // Customer Name
         });
-    }
+
+        // Fetch and display book name
+        getBookName(loan.BookID).then(bookname => {
+          cellBookName.textContent = bookname; // Book Name
+        });
+
+        // Display loan date
+        cellLoanDate.textContent = loan.LoanDate || ''; // Loan Date
+
+        // Display return date or a placeholder
+        if (loan.ReturnDate) {
+          cellReturnDate.textContent = loan.ReturnDate;
+        } else {
+          cellReturnDate.textContent = 'Not returned yet';
+        }
+
+        // Display loan type as "10 days," "5 days," or "2 days" in cellLoantime
+        const loanTypeText = getLoanTypeText(loan.LoanType);
+        cellLoantime.textContent = loanTypeText; // Loan Time
+
+        // Hide the actual book ID, customer ID, and loan type as hidden fields
+        const hiddenBookID = document.createElement('input');
+        hiddenBookID.type = 'hidden';
+        hiddenBookID.value = loan.BookID || ''; // Check for null values
+        row.appendChild(hiddenBookID);
+
+        const hiddenCustID = document.createElement('input');
+        hiddenCustID.type = 'hidden';
+        hiddenCustID.value = loan.CustID || ''; // Check for null values
+        row.appendChild(hiddenCustID);
+
+        const hiddenLoanType = document.createElement('input');
+        hiddenLoanType.type = 'hidden';
+        hiddenLoanType.value = loan.LoanType || ''; // Check for null values
+        row.appendChild(hiddenLoanType);
+
+        // Add the "Delete Loan" button
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete Loan';
+        deleteButton.classList.add('delete-loan-button');
+        deleteButton.dataset.loanId = loan.LoanID;
+
+        // Add an event listener for the "Delete Loan" button
+        deleteButton.addEventListener('click', (event) => {
+          const loanID = event.target.dataset.loanId;
+          if (!loan.ReturnDate) {
+            alert("Can't delete a loan that hasn't been returned yet.");
+          } else {
+            deleteLoan(loanID);
+          }
+        });
+
+        // Add the "Modify" button
+        const modifyButton = document.createElement('button');
+        modifyButton.textContent = 'Modify';
+        modifyButton.classList.add('modify-loan-button'); // Add a class to the button
+        modifyButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
+
+        // Add an event listener for the "Modify" button, passing the loan.LoanID
+        modifyButton.addEventListener('click', (event) => {
+          const loanID = event.target.dataset.loanId;
+          setLoanIDForModification(loanID);
+        });
+
+        // Add the "Return Book" button
+        const returnBookButton = document.createElement('button');
+        returnBookButton.textContent = 'Return Book';
+        returnBookButton.classList.add('return-book-button'); // Add a class to the button
+        returnBookButton.dataset.loanId = loan.LoanID; // Store loan ID as a data attribute
+
+        // Add an event listener for the "Return Book" button, passing the loan.LoanID
+        returnBookButton.addEventListener('click', (event) => {
+          const loanID = event.target.dataset.loanId;
+          returnBook(loanID);
+        });
+
+        cellActions.appendChild(deleteButton);
+        cellActions.appendChild(modifyButton);
+        cellActions.appendChild(returnBookButton);
+      });
+    })
+    .catch(error => {
+      console.error(error);
+      // Handle the error, e.g., display an error message to the user
+    });
+}
+
+
     
     // Helper function to fetch and display customer name by ID
     function getCustomerName(CustID) {
@@ -347,13 +380,21 @@
     window.addEventListener('load', getLoans);
     
     // Function to delete a loan
-    function deleteLoan(loanID) {
-      axios.delete(`/loans/${loanID}`)
-        .then(() => {
-          getLoans();
-        })
-        .catch(error => console.error(error));
-    }
+ function deleteLoan(loanID) {
+  axios.delete(`/loans/${loanID}`)
+    .then(response => {
+      if (response.data.done === 'success') {
+        alert('Loan deleted successfully');
+        getLoans(); // Reload the data to reflect the changes
+      } else {
+        alert('Error: ' + response.data.error);
+      }
+    })
+    .catch(error => {
+      alert('An error occurred while deleting the loan: ' + error);
+    });
+}
+
     
     // Function to set the LoanID for modification
     function setLoanIDForModification(loanID) {
@@ -508,6 +549,40 @@
       const selectedOption = customerSelect.options[customerSelect.selectedIndex];
       selectedCustomerID.value = selectedOption.value;
     }
+
+    function returnBook(loanID) {
+  axios.put(`/return_loan/${loanID}`)
+    .then(response => {
+      if (response.data.done === 'success') {
+        // Book returned successfully
+        alert('Book returned successfully');
+        // You may also update the loan list or take other actions as needed
+      } else if (response.status === 400 && response.data.error === 'Loan has already been returned') {
+        alert("Can't Return A Book That Has Already Been Returned");
+      } else if (response.status === 404 && response.data.error === 'Loan not found') {
+        alert("Loan not found");
+      } else if (response.status === 400 && response.data.error === 'Loan has not been returned') {
+        alert("Can't Return A Book That Hasn't Been Returned Yet");
+      } else if (response.status === 400 && response.data.error === 'Loan has been returned') {
+        alert("Can't Return A Book That Has Already Been Returned");
+      } else {
+        alert('Cant Return A Book That Has Already Been Returned');
+      }
+    })
+    .catch(error => {
+      alert("Can't Return A Book That Has Already Been Returned");
+    });
+}
+
+
+
+
+
+document.getElementById('returnBookButton').addEventListener('click', function () {
+    const loanID = this.dataset.loanId; // Retrieve the loan ID from the button's data attribute
+    returnBook(loanID);
+});
+
     
     </script>
     
