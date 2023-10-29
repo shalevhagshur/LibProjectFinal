@@ -43,8 +43,10 @@ The Library Management System is a web application that allows you to manage boo
    ```bash
    git clone https://github.com/shalevhagshur/LibProjectFinal.git
    cd ProjectLib
+   pip install virtualenv (once per computer)
+   python -m virtualenv myenv (once project)
    python -m venv venv
-   source venv/bin/activate or On Windows, use `venv\Scripts\activate`
+   source myenv/bin/activate or On Windows, use `myenv\Scripts\activate`
    pip install -r Requirements.txt
 
 
