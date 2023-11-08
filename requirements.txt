@@ -8,7 +8,7 @@ click==8.1.7
 colorama==0.4.6
 distlib==0.3.7
 Django==3.2.23
-django-cors-headers==4.3.0
+django-cors-headers==4.1.0
 djangorestframework==3.14.0
 dominate==2.8.0
 filelock==3.12.4
