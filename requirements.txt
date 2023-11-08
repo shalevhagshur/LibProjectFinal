@@ -11,7 +11,7 @@ Django==3.2.23
 django-cors-headers==4.1.0
 djangorestframework==3.14.0
 dominate==2.8.0
-filelock==3.12.2
+filelock==2.2.5
 Flask==2.3.3
 Flask-Bcrypt==1.0.1
 Flask-Bootstrap==3.3.7.1
