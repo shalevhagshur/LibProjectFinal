@@ -30,21 +30,21 @@
 
 <!-- Links (sit on top) -->
 <div class="w3-top">
-  <div class="w3-row w3-padding w3-black">
-    <div class="w3-col s3">
-        <a href="/" class="w3-button w3-block w3-black">HOME</a>
+    <div class="w3-row w3-padding w3-black">
+      <div class="w3-col s3">
+        <a href="./index.html" class="w3-button w3-block w3-black">HOME</a>
       </div>
       <div class="w3-col s3">
-        <a href="/bookpage" class="w3-button w3-block w3-black">Books</a>
+        <a href="./books.html" class="w3-button w3-block w3-black">Books</a>
       </div>
       <div class="w3-col s3">
-        <a href="/customerpage" class="w3-button w3-block w3-black">Customers</a>
+        <a href="./customers.html" class="w3-button w3-block w3-black">Customers</a>
       </div>
       <div class="w3-col s3">
-        <a href="/loanpage" class="w3-button w3-block w3-black">Loans</a>
+        <a href="./loans.html" class="w3-button w3-block w3-black">Loans</a>
       </div>
+    </div>
   </div>
-</div>
 
 <!-- Header with image -->
 <header class="bgimg w3-display-container w3-grayscale-min" id="home">
@@ -143,9 +143,11 @@
 
 <script>
 
+const MYSERVER = 'http://127.0.0.1:5000'
+
 async function isCustomerLoaned(customerID) {
     try {
-        const response = await axios.get(`/customers/${customerID}/loanstatus`);
+        const response = await axios.get(`${MYSERVER}/customers/${customerID}/loanstatus`);
         return response.data.loaned;
     } catch (error) {
         console.error(error);
@@ -157,7 +159,7 @@ async function isCustomerLoaned(customerID) {
 // Function to fetch and display customers
 async function getCustomers() {
     try {
-        const response = await axios.get('/customers');
+        const response = await axios.get(MYSERVER+'/customers');
         const customers = response.data;
         const table = document.getElementById('customers-table');
         const tbody = table.querySelector('tbody');
@@ -202,7 +204,7 @@ async function getCustomers() {
 
 
 function loadCustomerDataForUpdate(customerID) {
-    axios.get(`/customers/${customerID}`)
+    axios.get(`${MYSERVER}/customers/${customerID}`)
         .then(response => {
             const customer = response.data;
             // Populate the update table with the customer's data
@@ -215,7 +217,7 @@ function loadCustomerDataForUpdate(customerID) {
 
 // Function to delete a customer
 function deleteCustomer(customerID) {
-    axios.delete(`/customers/${customerID}`)
+    axios.delete(`${MYSERVER}/customers/${customerID}`)
         .then(() => {
             getCustomers();
         })
@@ -245,7 +247,7 @@ function updateCustomer() {
     }
 
     // Use the customerID to update the customer using the PUT route
-    axios.put(`/customers/${customerID}`, updatedCustomer)
+    axios.put(`${MYSERVER}/customers/${customerID}`, updatedCustomer)
         .then(() => {
             // Clear the form fields after the update
             document.getElementById('modifyName').value = '';
@@ -281,7 +283,7 @@ function addCustomer() {
         Age: age,
     };
 
-    axios.post('/customers', newCustomer)
+    axios.post(MYSERVER+'/customers', newCustomer)
         .then(response => {
             if (response.data.done === 'success') {
                 document.getElementById('newName').value = '';

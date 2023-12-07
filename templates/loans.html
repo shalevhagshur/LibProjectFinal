@@ -32,16 +32,16 @@
 <div class="w3-top">
   <div class="w3-row w3-padding w3-black">
     <div class="w3-col s3">
-      <a href="/" class="w3-button w3-block w3-black">HOME</a>
+      <a href="./index.html" class="w3-button w3-block w3-black">HOME</a>
     </div>
     <div class="w3-col s3">
-      <a href="/bookpage" class="w3-button w3-block w3-black">Books</a>
+      <a href="./books.html" class="w3-button w3-block w3-black">Books</a>
     </div>
     <div class="w3-col s3">
-      <a href="/customerpage" class="w3-button w3-block w3-black">Customers</a>
+      <a href="./customers.html" class="w3-button w3-block w3-black">Customers</a>
     </div>
     <div class="w3-col s3">
-      <a href="/loanpage" class="w3-button w3-block w3-black">Loans</a>
+      <a href="./loans.html" class="w3-button w3-block w3-black">Loans</a>
     </div>
   </div>
 </div>
@@ -188,6 +188,8 @@
 
 <script>
 
+const MYSERVER = 'http://127.0.0.1:5000'
+
     // Function to fetch and display loans
     // Define the getLoanTypeText function
     function getLoanTypeText(loanType) {
@@ -216,7 +218,7 @@
   }
 
   // Use the loanID to update the loan using the PUT route
-  axios.put(`/loans/${loanID}`, updatedLoan)
+  axios.put(`${MYSERVER}/loans/${loanID}`, updatedLoan)
     .then(() => {
       // Clear the form fields after the update
       document.getElementById('modifyLoanType').value = '';
@@ -233,7 +235,7 @@
     
     // Function to fetch and display loans with customer and book names
     function getLoans() {
-  axios.get('/loans')
+  axios.get(MYSERVER+'/loans')
     .then(response => {
       const loans = response.data;
       const table = document.getElementById('loans-table');
@@ -348,7 +350,7 @@
     
     // Helper function to fetch and display customer name by ID
     function getCustomerName(CustID) {
-      return axios.get(`/customers/${CustID}`)
+      return axios.get(`${MYSERVER}/customers/${CustID}`)
         .then(customerResponse => {
           if (customerResponse.status === 200) {
             return customerResponse.data.CustName || 'Unknown'; // Use CustName as the property
@@ -364,7 +366,7 @@
     
     // Helper function to fetch and display book name by ID
     function getBookName(BookID) {
-      return axios.get(`/books/${BookID}`)
+      return axios.get(`${MYSERVER}/books/${BookID}`)
         .then(bookResponse => {
           if (bookResponse.status === 200) {
             return bookResponse.data.bookname || 'Unknown';
@@ -391,7 +393,7 @@
     
     // Function to delete a loan
     function deleteLoan(loanID) {
-  axios.delete(`/loans/${loanID}`)
+  axios.delete(`${MYSERVER}/loans/${loanID}`)
     .then(response => {
       if (response.data.done === 'success') {
         alert('Loan deleted successfully');
@@ -414,7 +416,7 @@
       const modifyLoanIDInput = document.getElementById('modifyLoanID');
     
       // Use the loanID to fetch the loan details and populate the fields
-      axios.get(`/loans/${loanID}`)
+      axios.get(`${MYSERVER}/loans/${loanID}`)
         .then(response => {
           const loan = response.data;
           if (loan) {
@@ -455,7 +457,7 @@
         LoanType: loanType,
       };
     
-      axios.post('/loans', newLoan)
+      axios.post(MYSERVER+'/loans', newLoan)
         .then(response => {
           if (response.data.done === 'success') {
             // Reset the fields and set "Select a customer" and "Select a book" as defaults
@@ -502,7 +504,7 @@
     
     // Function to fetch and display books
     function getAvailableBooks() {
-      axios.get('/books')
+      axios.get(MYSERVER+'/books')
         .then(response => {
           const books = response.data;
           const bookSelect = document.getElementById('bookSelect');
@@ -533,7 +535,7 @@
     
     // Function to fetch and display customers
     function getAvailableCustomers() {
-      axios.get('/customers')
+      axios.get(MYSERVER+'/customers')
         .then(response => {
           const customers = response.data;
           const customerSelect = document.getElementById('customerSelect');
@@ -561,7 +563,7 @@
     }
 
     function returnBook(loanID) {
-  axios.put(`/return_loan/${loanID}`)
+  axios.put(`${MYSERVER}/return_loan/${loanID}`)
     .then(response => {
       if (response.data.done === 'success') {
         // Book returned successfully
@@ -688,13 +690,13 @@ function loadLoansList(selectedOption) {
   loanListContainer.innerHTML = '';
 
   // Define the URL based on the selected option
-  let url = '/loans';
+  let url = MYSERVER+'/loans';
   if (selectedOption === 'expired') {
-    url = '/loans/expired';
+    url = MYSERVER+'/loans/expired';
   } else if (selectedOption === 'not-returned') {
-    url = '/loans/not-returned';
+    url = MYSERVER+'/loans/not-returned';
   } else if (selectedOption === 'returned') {
-    url = '/loans/returned';
+    url = MYSERVER+'/loans/returned';
   }
 
   // Make an AJAX request to get the loans data

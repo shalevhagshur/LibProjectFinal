@@ -1,8 +1,9 @@
 // books.js
+const MYSERVER = 'http://127.0.0.1:5000'
 
 // Function to fetch and display books
 function getBooks() {
-    fetch('/books') // Make a GET request to the /books endpoint
+    fetch(MYSERVER+'/books') // Make a GET request to the /books endpoint
         .then(response => response.json()) // Parse the response as JSON
         .then(books => {
             // Assuming you have a table with the id 'books-table'
@@ -35,7 +36,7 @@ function getBooks() {
 
 // Function to delete a book
 function deleteBook(bookID) {
-    fetch(`/books/${bookID}`, {
+    fetch(`${MYSERVER}/books/${bookID}`, {
         method: 'DELETE',
     })
         .then(() => {
@@ -68,7 +69,7 @@ function addBook() {
         stock,
     };
 
-    fetch('/books', {
+    fetch(MYSERVER+'/books', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

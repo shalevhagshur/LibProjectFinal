@@ -1,6 +1,6 @@
 #imports
 from sqlite3 import IntegrityError
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, make_response, render_template, request, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -9,10 +9,9 @@ from datetime import datetime, timedelta
 
 #flask app
 # Create a Flask web application
-app = Flask(__name__, static_folder="static", static_url_path="/static")
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable caching for static files
-
+app = Flask(__name__)
 CORS(app)
+
 
 # Configure your database connection URI
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'  # You can change this to your preferred database
@@ -95,6 +94,15 @@ class Loan(db.Model):
 #CRUDS for everything
 
 # CRUD for Books
+
+@app.route('/books', methods=['OPTIONS'])
+def handle_options():
+    response = make_response()
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', '*')
+    response.headers.add('Access-Control-Allow-Methods', '*')
+    return response
+
 @app.route('/books/', methods=['GET', 'POST'])
 @app.route('/books/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def books(id=None):

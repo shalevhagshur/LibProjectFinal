@@ -30,21 +30,21 @@
 
 <!-- Links (sit on top) -->
 <div class="w3-top">
-  <div class="w3-row w3-padding w3-black">
-    <div class="w3-col s3">
-        <a href="/" class="w3-button w3-block w3-black">HOME</a>
+    <div class="w3-row w3-padding w3-black">
+      <div class="w3-col s3">
+        <a href="./index.html" class="w3-button w3-block w3-black">HOME</a>
       </div>
       <div class="w3-col s3">
-        <a href="/bookpage" class="w3-button w3-block w3-black">Books</a>
+        <a href="./books.html" class="w3-button w3-block w3-black">Books</a>
       </div>
       <div class="w3-col s3">
-        <a href="/customerpage" class="w3-button w3-block w3-black">Customers</a>
+        <a href="./customers.html" class="w3-button w3-block w3-black">Customers</a>
       </div>
       <div class="w3-col s3">
-        <a href="/loanpage" class="w3-button w3-block w3-black">Loans</a>
+        <a href="./loans.html" class="w3-button w3-block w3-black">Loans</a>
       </div>
+    </div>
   </div>
-</div>
 
 <!-- Header with image -->
 <header class="bgimg w3-display-container w3-grayscale-min" id="home">
@@ -148,11 +148,12 @@
 
 <script>
 
+const MYSERVER = 'http://127.0.0.1:5000'
 
 // Add this function to check the loan status for a book
 async function isBookLoaned(bookID) {
     try {
-        const response = await axios.get(`/books/${bookID}/loanstatus`);
+        const response = await axios.get(`${MYSERVER}/books/${bookID}/loanstatus`);
         return response.data.loaned;
     } catch (error) {
         console.error(error);
@@ -163,7 +164,7 @@ async function isBookLoaned(bookID) {
 // Modify the getBooks function to check the loan status and disable buttons
 async function getBooks() {
     try {
-        const response = await axios.get('/books');
+        const response = await axios.get(MYSERVER+'/books');
         const books = response.data;
         const table = document.getElementById('books-table');
         const tbody = table.querySelector('tbody');
@@ -213,7 +214,7 @@ async function getBooks() {
 
     // Function to delete a book
     function deleteBook(bookID) {
-        axios.delete(`/books/${bookID}`)
+        axios.delete(`${MYSERVER}/books/${bookID}`)
             .then(() => {
                 getBooks();
             })
@@ -244,7 +245,7 @@ function updateBook() {
     }
 
     // Use the bookID to update the book using the PUT route
-    axios.put(`/books/${bookID}`, updatedBook)
+    axios.put(`${MYSERVER}/books/${bookID}`, updatedBook)
         .then(() => {
             // Clear the form fields after the update
             document.getElementById('modifyTitle').value = '';
@@ -261,7 +262,7 @@ function updateBook() {
 
 
 function loadBookDataForUpdate(bookID) {
-    axios.get(`/books/${bookID}`)
+    axios.get(`${MYSERVER}/books/${bookID}`)
         .then(response => {
             const book = response.data;
             // Populate the update table with the book's data
@@ -276,7 +277,6 @@ function loadBookDataForUpdate(bookID) {
     // Call getBooks() when the page loads
     window.addEventListener('load', getBooks);
     
-    // Function to add a new book
 // Function to add a new book
 function addBook() {
     const bookname = document.getElementById('newTitle').value;
@@ -297,7 +297,7 @@ function addBook() {
         stock,
     };
 
-    axios.post('/books', newBook)
+    axios.post(MYSERVER+'/books', newBook)
         .then(response => {
             if (response.data.done === 'success') {
                 document.getElementById('newTitle').value = '';
